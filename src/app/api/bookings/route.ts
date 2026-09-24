@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
     const status =
       result.reason === "conflict" ||
       result.reason === "resource_taken" ||
+      result.reason === "already_booked" ||
       result.reason === "checkin_window_closed"
         ? 409
         : result.reason === "half_day_not_enabled"

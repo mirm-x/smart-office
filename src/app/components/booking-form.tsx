@@ -89,6 +89,7 @@ const RESOURCE_TYPES: Record<ResourceChoice, ResourceType[]> = {
 const BOOKING_ERROR: Record<string, string> = {
   no_resource_available: "No resource free for that date and period. Try another slot.",
   resource_taken: "That space was just taken. Pick another on the map.",
+  already_booked: "You already have a booking for this date and period.",
   conflict: "That space was just taken. Please try again.",
   unknown_employee: "We don't recognise that employee id.",
   half_day_not_enabled: "Half-day booking isn't enabled — choose Full day.",
@@ -126,16 +127,6 @@ function ResourceGlyph({ type }: { type: ResourceType }) {
     </svg>
   );
 }
-
-// Non-bookable amenity zones shown for context on the floor plan. Illustrative
-// only -- they are NOT rentable spaces (greenery, piazza, lounge, workshop),
-// mirroring the real office plan the client shared.
-const PLAN_ZONES: { key: string; label: string; note: string }[] = [
-  { key: "greenery", label: "Greenery", note: "Planted area" },
-  { key: "piazza", label: "Piazza", note: "Open communal" },
-  { key: "collab", label: "Collab", note: "Lounge / meeting" },
-  { key: "workshop", label: "Workshop", note: "Event space" },
-];
 
 // Groups desks into pods by the letter in their label (e.g. "Desk A3" -> pod
 // "A"), so the floor map can lay them out as clustered desk pods.
@@ -480,15 +471,6 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
               <span className="tag-simulated">Illustrative layout · booking availability</span>
             </div>
             <div className="floorplan">
-              <div className="floorplan__zones" aria-hidden="true">
-                {PLAN_ZONES.map((z) => (
-                  <div key={z.key} className={`zone zone--${z.key}`}>
-                    <span className="zone__label">{z.label}</span>
-                    <span className="zone__note">{z.note}</span>
-                    <span className="zone__tag">Not bookable</span>
-                  </div>
-                ))}
-              </div>
               <div className="floorplan__room">
                 {(resource === "desk" || resource === "both") && (
                   <div className="room-area">
@@ -548,9 +530,6 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
               </span>
               <span className="plan-legend__item">
                 <span className="plan-legend__swatch plan-legend__swatch--taken" /> Taken
-              </span>
-              <span className="plan-legend__item">
-                <span className="plan-legend__swatch plan-legend__swatch--zone" /> Amenity · not bookable
               </span>
             </div>
           </div>

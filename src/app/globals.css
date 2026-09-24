@@ -570,7 +570,7 @@ a {
   color: var(--status-reserved-text);
 }
 
-/* Floor map (zoned office plan) ------------------------------------------- */
+/* Floor map (office plan) ------------------------------------------------- */
 .floorplan {
   display: flex;
   flex-direction: column;
@@ -582,57 +582,6 @@ a {
   background-image: linear-gradient(rgba(174, 182, 194, 0.14) 1px, transparent 1px),
     linear-gradient(90deg, rgba(174, 182, 194, 0.14) 1px, transparent 1px);
   background-size: 22px 22px;
-}
-
-/* Non-bookable amenity zones (decorative context, along the top). */
-.floorplan__zones {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-2);
-}
-
-.zone {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  min-height: 62px;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  border: 1px dashed rgba(27, 36, 48, 0.18);
-}
-
-.zone__label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.zone__note {
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
-.zone__tag {
-  margin-top: 2px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-}
-
-.zone--greenery {
-  background: #e3f3e8;
-}
-.zone--piazza {
-  background: #fdf3d6;
-}
-.zone--collab {
-  background: #e2ecfb;
-}
-.zone--workshop {
-  background: #fbe4de;
 }
 
 /* Bookable areas (desks in pods, parking in a row). */
@@ -710,7 +659,7 @@ a {
   gap: var(--space-2);
 }
 
-/* Space tiles (clickable buttons). Blue = free, filled blue = selected. */
+/* Space tiles (clickable buttons). Green = free, filled green = selected. */
 .ptile {
   display: flex;
   flex-direction: column;
@@ -727,23 +676,23 @@ a {
 }
 
 .ptile--free {
-  background: var(--status-reserved-bg);
-  border-color: var(--brand-600);
-  box-shadow: inset 0 0 0 1px var(--brand-600);
+  background: #e3f6ea;
+  border-color: #1f9d57;
+  box-shadow: inset 0 0 0 1px #1f9d57;
 }
 
 .ptile--free:hover {
-  background: #d6e4fb;
+  background: #d1efdc;
 }
 
 .ptile--free .ptile__glyph {
-  color: var(--brand-600);
+  color: #157a41;
 }
 
 .ptile--selected {
-  background: var(--brand-600);
-  border-color: var(--brand-700);
-  box-shadow: inset 0 0 0 1px var(--brand-700);
+  background: #1f9d57;
+  border-color: #157a41;
+  box-shadow: inset 0 0 0 1px #157a41;
   cursor: pointer;
 }
 
@@ -778,7 +727,7 @@ a {
 }
 
 .ptile--free .ptile__state {
-  color: var(--brand-700);
+  color: #157a41;
 }
 
 .plan-legend {
@@ -803,13 +752,13 @@ a {
 }
 
 .plan-legend__swatch--free {
-  background: var(--status-reserved-bg);
-  border: 1px solid var(--brand-600);
+  background: #e3f6ea;
+  border: 1px solid #1f9d57;
 }
 
 .plan-legend__swatch--selected {
-  background: var(--brand-600);
-  border: 1px solid var(--brand-700);
+  background: #1f9d57;
+  border: 1px solid #157a41;
 }
 
 .plan-legend__swatch--taken {
@@ -817,17 +766,9 @@ a {
   border: 1px solid var(--border-strong);
 }
 
-.plan-legend__swatch--zone {
-  background: #fdf3d6;
-  border: 1px dashed rgba(27, 36, 48, 0.3);
-}
-
 @media (max-width: 599px) {
   .period-grid {
     grid-template-columns: 1fr;
-  }
-  .floorplan__zones {
-    grid-template-columns: 1fr 1fr;
   }
 }
 

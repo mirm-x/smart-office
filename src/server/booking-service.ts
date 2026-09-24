@@ -38,6 +38,7 @@ export type CreateBookingResult =
         | "invalid_date"
         | "no_resource_available"
         | "resource_taken"
+        | "already_booked"
         | "conflict"
         | "unknown_employee"
         | "half_day_not_enabled"
@@ -102,6 +103,29 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
     const requestId = request.rows[0]!.id;
 
     const claimPeriods = claimsForPeriod(input.period);
+
+    // Friendly pre-check: this employee may hold only one claim per
+    // (resource_type, date, period) -- enforced by the
+    // booking_claims_employee_active_period unique index. Without this check a
+    // second booking for a slot the employee already holds would surface as a
+    // generic `conflict` ("that space was just taken"), which is misleading
+    // because the space isn't the problem -- they already booked it. Detect it
+    // up front and return a precise reason. The unique index remains the
+    // race-safe backstop.
+    const already = await client.query<{ resource_type: ResourceType }>(
+      `select distinct resource_type
+         from booking_claims
+        where employee_id = $1
+          and work_date = $2
+          and period = any($3::text[])
+          and resource_type = any($4::text[])
+          and status in ('reserved', 'checked_in')`,
+      [employeeId, input.workDate, claimPeriods, input.resourceTypes]
+    );
+    if (already.rowCount && already.rowCount > 0) {
+      await client.query("rollback");
+      return { ok: false, reason: "already_booked" };
+    }
 
     // Resolve each selected space to one active resource of the requested type.
     // A stale or invalid selection must not silently turn into auto-assignment.
