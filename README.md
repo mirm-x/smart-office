@@ -41,6 +41,11 @@ npm run worker              # in a second terminal: automatic release worker
 ## Try the API
 
 ```bash
+# Simulated sign-in (labelled simulated; full delivery uses Entra): sets a
+# signed session cookie that the check-in API trusts for ownership.
+curl -s localhost:3000/api/auth/login -X POST -H 'content-type: application/json' \
+  -d '{"employeeExternalId": "emp-alice"}' -c /tmp/so-cookies.txt
+
 # Book a desk and a parking space for a future weekday, full day
 curl -s localhost:3000/api/bookings -X POST -H 'content-type: application/json' -d '{
   "employeeExternalId": "emp-alice",
@@ -49,11 +54,10 @@ curl -s localhost:3000/api/bookings -X POST -H 'content-type: application/json' 
   "resourceTypes": ["desk", "parking"]
 }'
 
-# Check in the desk half of that booking (use the requestId from the response above)
-curl -s localhost:3000/api/bookings/<requestId>/checkin -X POST -H 'content-type: application/json' -d '{
-  "employeeExternalId": "emp-alice",
-  "resourceType": "desk"
-}'
+# Check in the desk half of that booking (use the requestId from the response above).
+# The employee is taken from the session cookie, not the request body.
+curl -s localhost:3000/api/bookings/<requestId>/checkin -X POST -H 'content-type: application/json' \
+  -b /tmp/so-cookies.txt -d '{"resourceType": "desk"}'
 ```
 
 Leave the parking half un-checked-in and watch `npm run worker` release it

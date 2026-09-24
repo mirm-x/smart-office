@@ -16,7 +16,12 @@ export async function POST(req: NextRequest) {
   });
 
   if (!result.ok) {
-    const status = result.reason === "conflict" ? 409 : result.reason === "half_day_not_enabled" ? 403 : 422;
+    const status =
+      result.reason === "conflict" || result.reason === "checkin_window_closed"
+        ? 409
+        : result.reason === "half_day_not_enabled"
+          ? 403
+          : 422;
     return NextResponse.json({ error: result.reason }, { status });
   }
 

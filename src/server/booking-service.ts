@@ -1,6 +1,14 @@
 import { PoolClient } from "pg";
 import { db } from "@/lib/db";
-import { ClaimPeriod, Period, claimsForPeriod, claimWindow, isWorkingDate, isWithinBookingHorizon } from "./booking-policy";
+import {
+  ClaimPeriod,
+  Period,
+  canCheckInSameDay,
+  claimsForPeriod,
+  claimWindow,
+  isWorkingDate,
+  isWithinBookingHorizon,
+} from "./booking-policy";
 
 export type ResourceType = "desk" | "parking";
 
@@ -13,7 +21,16 @@ export interface CreateBookingInput {
 
 export type CreateBookingResult =
   | { ok: true; requestId: string; claimIds: string[] }
-  | { ok: false; reason: "invalid_date" | "no_resource_available" | "conflict" | "unknown_employee" | "half_day_not_enabled" };
+  | {
+      ok: false;
+      reason:
+        | "invalid_date"
+        | "no_resource_available"
+        | "conflict"
+        | "unknown_employee"
+        | "half_day_not_enabled"
+        | "checkin_window_closed";
+    };
 
 const UNIQUE_VIOLATION = "23505";
 
@@ -42,6 +59,14 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
   }
   if (!HALF_DAY_BOOKING_ENABLED && input.period !== "full_day") {
     return { ok: false, reason: "half_day_not_enabled" };
+  }
+  // A same-day booking whose check-in window has already closed could never
+  // be checked in and would only be released as a no-show (plan section 2,
+  // "Bookings after a check-in deadline"). "Book and check in now" is part of
+  // the same pending facilitator decision, so until it lands the API rejects
+  // dead same-day bookings instead of creating them.
+  if (!canCheckInSameDay(input.workDate, input.period)) {
+    return { ok: false, reason: "checkin_window_closed" };
   }
 
   const client = await db.connect();
@@ -186,7 +211,9 @@ export async function checkIn(
       await client.query("rollback");
       return { ok: false, reason: "not_found" };
     }
-    // The server supplies the employee identity; it never trusts a client-passed id (criterion #3).
+    // The employee identity comes from the signed session set by the
+    // simulated sign-in route; the API never trusts a client-passed id
+    // (criterion #3).
     if (claims.rows[0]!.employee_id !== employeeId) {
       await client.query("rollback");
       return { ok: false, reason: "not_owner" };
