@@ -1,0 +1,62 @@
+{
+  "$description": "Tier-1 Smart Office UI design tokens. Import with the Tokens Studio for Figma plugin (Figma > Plugins > Tokens Studio > Load from file / paste). Token names mirror docs/design/tier1-ui-spec.md.",
+  "color": {
+    "bg": {
+      "canvas": { "value": "#F6F7F9", "type": "color" },
+      "surface": { "value": "#FFFFFF", "type": "color" },
+      "subtle": { "value": "#EEF1F4", "type": "color" }
+    },
+    "border": {
+      "default": { "value": "#D5DAE1", "type": "color" },
+      "strong": { "value": "#AEB6C2", "type": "color" }
+    },
+    "text": {
+      "primary": { "value": "#1B2430", "type": "color" },
+      "secondary": { "value": "#5A6572", "type": "color" },
+      "inverse": { "value": "#FFFFFF", "type": "color" }
+    },
+    "brand": {
+      "600": { "value": "#1F5FBF", "type": "color" },
+      "700": { "value": "#184C99", "type": "color" }
+    },
+    "focus": {
+      "ring": { "value": "#1F5FBF", "type": "color" }
+    },
+    "status": {
+      "reserved": { "bg": { "value": "#E7EEFB", "type": "color" }, "text": { "value": "#184C99", "type": "color" } },
+      "checked-in": { "bg": { "value": "#E3F3E8", "type": "color" }, "text": { "value": "#1E6B3A", "type": "color" } },
+      "released": { "bg": { "value": "#FCEBE7", "type": "color" }, "text": { "value": "#A5341E", "type": "color" } },
+      "cancelled": { "bg": { "value": "#EEF1F4", "type": "color" }, "text": { "value": "#5A6572", "type": "color" } },
+      "warning": { "bg": { "value": "#FDF3E1", "type": "color" }, "text": { "value": "#8A5A00", "type": "color" } },
+      "simulated": { "bg": { "value": "#F2ECFB", "type": "color" }, "text": { "value": "#5B3B9B", "type": "color" } }
+    }
+  },
+  "space": {
+    "1": { "value": "4", "type": "spacing" },
+    "2": { "value": "8", "type": "spacing" },
+    "3": { "value": "12", "type": "spacing" },
+    "4": { "value": "16", "type": "spacing" },
+    "5": { "value": "20", "type": "spacing" },
+    "6": { "value": "24", "type": "spacing" },
+    "7": { "value": "32", "type": "spacing" },
+    "8": { "value": "40", "type": "spacing" },
+    "9": { "value": "48", "type": "spacing" },
+    "10": { "value": "64", "type": "spacing" }
+  },
+  "radius": {
+    "sm": { "value": "6", "type": "borderRadius" },
+    "md": { "value": "10", "type": "borderRadius" },
+    "lg": { "value": "14", "type": "borderRadius" },
+    "pill": { "value": "999", "type": "borderRadius" }
+  },
+  "font": {
+    "family": { "value": "Inter", "type": "fontFamilies" },
+    "display": { "value": { "fontSize": "28", "lineHeight": "34", "fontWeight": "700" }, "type": "typography" },
+    "h2": { "value": { "fontSize": "20", "lineHeight": "28", "fontWeight": "600" }, "type": "typography" },
+    "h3": { "value": { "fontSize": "16", "lineHeight": "24", "fontWeight": "600" }, "type": "typography" },
+    "body": { "value": { "fontSize": "15", "lineHeight": "22", "fontWeight": "400" }, "type": "typography" },
+    "body-strong": { "value": { "fontSize": "15", "lineHeight": "22", "fontWeight": "600" }, "type": "typography" },
+    "label": { "value": { "fontSize": "13", "lineHeight": "18", "fontWeight": "600" }, "type": "typography" },
+    "help": { "value": { "fontSize": "13", "lineHeight": "18", "fontWeight": "400" }, "type": "typography" }
+  }
+}

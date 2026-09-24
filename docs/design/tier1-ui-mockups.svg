@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2360" height="920" viewBox="0 0 2360 920" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <!--
+    Tier-1 Smart Office UI mockups. Drag this file into Figma (File > Place image
+    / just drag onto the canvas) to import it as editable vector frames & text.
+    Mirrors docs/design/tier1-ui-spec.md. Tokens: docs/design/tier1-ui-tokens.json.
+  -->
+  <rect id="page-bg" x="0" y="0" width="2360" height="920" fill="#EDEFF2"/>
+  <text x="40" y="44" font-size="22" font-weight="700" fill="#1B2430">Smart Office POC — tier-1 UI mockups (FR-03 / FR-08 / FR-09)</text>
+  <text x="40" y="66" font-size="13" fill="#5A6572">Book a space · My bookings · design source: docs/design/tier1-ui-spec.md — everything simulated is labelled</text>
+
+  <!-- ============ FRAME 1: FOUNDATIONS ============ -->
+  <g id="Foundations">
+    <rect x="40" y="90" width="600" height="800" rx="14" fill="#FFFFFF" stroke="#D5DAE1"/>
+    <text x="64" y="128" font-size="18" font-weight="600" fill="#1B2430">1 · Foundations</text>
+
+    <text x="64" y="164" font-size="13" font-weight="600" fill="#5A6572">Core colour</text>
+    <g id="swatches-core">
+      <rect x="64" y="176" width="120" height="44" rx="6" fill="#F6F7F9" stroke="#D5DAE1"/><text x="70" y="240" font-size="11" fill="#5A6572">bg/canvas #F6F7F9</text>
+      <rect x="196" y="176" width="120" height="44" rx="6" fill="#FFFFFF" stroke="#D5DAE1"/><text x="202" y="240" font-size="11" fill="#5A6572">bg/surface #FFF</text>
+      <rect x="328" y="176" width="120" height="44" rx="6" fill="#1F5FBF"/><text x="334" y="240" font-size="11" fill="#5A6572">brand/600 #1F5FBF</text>
+      <rect x="460" y="176" width="120" height="44" rx="6" fill="#1B2430"/><text x="466" y="240" font-size="11" fill="#5A6572">text/primary</text>
+    </g>
+
+    <text x="64" y="276" font-size="13" font-weight="600" fill="#5A6572">Status palette (icon + text + colour, WCAG AA)</text>
+    <g id="swatches-status">
+      <rect x="64" y="288" width="120" height="44" rx="6" fill="#E7EEFB"/><text x="74" y="315" font-size="12" font-weight="600" fill="#184C99">Reserved</text>
+      <rect x="196" y="288" width="120" height="44" rx="6" fill="#E3F3E8"/><text x="206" y="315" font-size="12" font-weight="600" fill="#1E6B3A">Checked in</text>
+      <rect x="328" y="288" width="120" height="44" rx="6" fill="#FCEBE7"/><text x="338" y="315" font-size="12" font-weight="600" fill="#A5341E">Released</text>
+      <rect x="460" y="288" width="120" height="44" rx="6" fill="#EEF1F4"/><text x="470" y="315" font-size="12" font-weight="600" fill="#5A6572">Cancelled</text>
+      <rect x="64" y="340" width="120" height="44" rx="6" fill="#FDF3E1"/><text x="74" y="367" font-size="12" font-weight="600" fill="#8A5A00">Warning</text>
+      <rect x="196" y="340" width="252" height="44" rx="6" fill="#F2ECFB"/><text x="206" y="367" font-size="12" font-weight="600" fill="#5B3B9B">Simulated element label</text>
+    </g>
+
+    <text x="64" y="428" font-size="13" font-weight="600" fill="#5A6572">Type scale</text>
+    <text x="64" y="462" font-size="28" font-weight="700" fill="#1B2430">Display 28/700</text>
+    <text x="64" y="492" font-size="20" font-weight="600" fill="#1B2430">Heading H2 20/600</text>
+    <text x="64" y="518" font-size="16" font-weight="600" fill="#1B2430">Card title H3 16/600</text>
+    <text x="64" y="542" font-size="15" font-weight="400" fill="#1B2430">Body 15/400 — a timely check-in protects your booking.</text>
+    <text x="64" y="566" font-size="13" font-weight="600" fill="#5A6572">Label 13/600</text>
+    <text x="64" y="588" font-size="13" font-weight="400" fill="#5A6572">Help 13/400</text>
+
+    <text x="64" y="632" font-size="13" font-weight="600" fill="#5A6572">Spacing (4pt) · Radius · Elevation</text>
+    <g id="spacing">
+      <rect x="64" y="644" width="4" height="24" fill="#1F5FBF"/><rect x="76" y="644" width="8" height="24" fill="#1F5FBF"/><rect x="92" y="644" width="12" height="24" fill="#1F5FBF"/><rect x="112" y="644" width="16" height="24" fill="#1F5FBF"/><rect x="136" y="644" width="24" height="24" fill="#1F5FBF"/><rect x="168" y="644" width="32" height="24" fill="#1F5FBF"/>
+      <text x="210" y="661" font-size="11" fill="#5A6572">4 · 8 · 12 · 16 · 24 · 32</text>
+      <rect x="64" y="684" width="60" height="40" rx="6" fill="#EEF1F4" stroke="#D5DAE1"/><text x="130" y="709" font-size="11" fill="#5A6572">radius/sm 6</text>
+      <rect x="230" y="684" width="60" height="40" rx="10" fill="#EEF1F4" stroke="#D5DAE1"/><text x="296" y="709" font-size="11" fill="#5A6572">radius/md 10</text>
+      <rect x="400" y="684" width="60" height="40" rx="999" fill="#EEF1F4" stroke="#D5DAE1"/><text x="466" y="709" font-size="11" fill="#5A6572">pill</text>
+    </g>
+    <text x="64" y="768" font-size="11" fill="#5A6572">Layout: 760 max-width, single column · breakpoints sm/md/lg (600/1024)</text>
+  </g>
+
+  <!-- ============ FRAME 2: COMPONENTS ============ -->
+  <g id="Components">
+    <rect x="700" y="90" width="560" height="800" rx="14" fill="#FFFFFF" stroke="#D5DAE1"/>
+    <text x="724" y="128" font-size="18" font-weight="600" fill="#1B2430">2 · Components</text>
+
+    <text x="724" y="162" font-size="13" font-weight="600" fill="#5A6572">Button</text>
+    <g id="buttons">
+      <rect x="724" y="174" width="120" height="40" rx="10" fill="#1F5FBF"/><text x="784" y="199" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">Primary</text>
+      <rect x="856" y="174" width="120" height="40" rx="10" fill="#FFFFFF" stroke="#D5DAE1"/><text x="916" y="199" font-size="14" font-weight="600" fill="#1B2430" text-anchor="middle">Secondary</text>
+      <rect x="988" y="174" width="100" height="40" rx="10" fill="#FFFFFF"/><text x="1038" y="199" font-size="14" font-weight="600" fill="#1F5FBF" text-anchor="middle">Ghost</text>
+      <rect x="1100" y="174" width="120" height="40" rx="10" fill="#1F5FBF" opacity="0.4"/><text x="1160" y="199" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">Disabled</text>
+    </g>
+
+    <text x="724" y="254" font-size="13" font-weight="600" fill="#5A6572">StatusBadge</text>
+    <g id="badges">
+      <rect x="724" y="266" width="104" height="26" rx="999" fill="#E7EEFB"/><text x="776" y="283" font-size="12" font-weight="600" fill="#184C99" text-anchor="middle">◷ Reserved</text>
+      <rect x="840" y="266" width="112" height="26" rx="999" fill="#E3F3E8"/><text x="896" y="283" font-size="12" font-weight="600" fill="#1E6B3A" text-anchor="middle">✓ Checked in</text>
+      <rect x="964" y="266" width="100" height="26" rx="999" fill="#FCEBE7"/><text x="1014" y="283" font-size="12" font-weight="600" fill="#A5341E" text-anchor="middle">↩ Released</text>
+      <rect x="1076" y="266" width="104" height="26" rx="999" fill="#EEF1F4"/><text x="1128" y="283" font-size="12" font-weight="600" fill="#5A6572" text-anchor="middle">⊘ Cancelled</text>
+    </g>
+
+    <text x="724" y="330" font-size="13" font-weight="600" fill="#5A6572">Banner / Alert</text>
+    <g id="banners">
+      <rect x="724" y="342" width="496" height="40" rx="6" fill="#E7EEFB"/><text x="740" y="367" font-size="13" fill="#184C99">ⓘ 12 desks and 5 parking spaces free for that slot.</text>
+      <rect x="724" y="390" width="496" height="40" rx="6" fill="#FCEBE7"/><text x="740" y="415" font-size="13" fill="#A5341E">⚠ That space was just taken. Please try again.</text>
+      <rect x="724" y="438" width="496" height="40" rx="6" fill="#F2ECFB"/><text x="740" y="463" font-size="13" fill="#5B3B9B">◈ Simulated sign-in — no real SSO.</text>
+    </g>
+
+    <text x="724" y="514" font-size="13" font-weight="600" fill="#5A6572">Field (label · input · help/error)</text>
+    <g id="field">
+      <text x="724" y="536" font-size="13" font-weight="600" fill="#1B2430">Work date</text>
+      <rect x="724" y="544" width="240" height="40" rx="6" fill="#FFFFFF" stroke="#D5DAE1"/><text x="740" y="569" font-size="14" fill="#1B2430">Mon 28 Sep 2026</text>
+      <text x="724" y="602" font-size="12" fill="#5A6572">Weekdays only, up to 14 days ahead.</text>
+      <text x="984" y="536" font-size="13" font-weight="600" fill="#1B2430">Error state</text>
+      <rect x="984" y="544" width="236" height="40" rx="6" fill="#FFFFFF" stroke="#A5341E"/><text x="1000" y="569" font-size="14" fill="#1B2430">Sat 26 Sep 2026</text>
+      <text x="984" y="602" font-size="12" fill="#A5341E">⚠ Pick a weekday within 14 days.</text>
+    </g>
+
+    <text x="724" y="646" font-size="13" font-weight="600" fill="#5A6572">Select — segmented (period / resource)</text>
+    <g id="segments">
+      <rect x="724" y="658" width="120" height="40" rx="8" fill="#1F5FBF"/><text x="784" y="683" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Morning</text>
+      <rect x="848" y="658" width="120" height="40" rx="8" fill="#FFFFFF" stroke="#D5DAE1"/><text x="908" y="683" font-size="13" fill="#1B2430" text-anchor="middle">Afternoon</text>
+      <rect x="972" y="658" width="120" height="40" rx="8" fill="#FFFFFF" stroke="#D5DAE1"/><text x="1032" y="683" font-size="13" fill="#1B2430" text-anchor="middle">Full day</text>
+      <text x="724" y="726" font-size="11" fill="#5A6572">Full-set shown when HALF_DAY_BOOKING_ENABLED=true; else single "Full day" segment.</text>
+    </g>
+
+    <text x="724" y="762" font-size="13" font-weight="600" fill="#5A6572">Countdown</text>
+    <text x="724" y="784" font-size="13" fill="#8A5A00">◷ Check in before 10:00 · 07:42 left</text>
+    <text x="724" y="806" font-size="13" fill="#A5341E">◷ Window closed</text>
+  </g>
+
+  <!-- ============ FRAME 3: BOOK A SPACE ============ -->
+  <g id="Screen-Book">
+    <rect x="1320" y="90" width="420" height="800" rx="14" fill="#F6F7F9" stroke="#D5DAE1"/>
+    <!-- identity bar -->
+    <rect x="1320" y="90" width="420" height="56" rx="14" fill="#FFFFFF"/>
+    <rect x="1320" y="130" width="420" height="16" fill="#FFFFFF"/>
+    <text x="1340" y="124" font-size="15" font-weight="600" fill="#1B2430">Smart Office</text>
+    <rect x="1470" y="106" width="130" height="26" rx="6" fill="#FFFFFF" stroke="#D5DAE1"/><text x="1478" y="123" font-size="12" fill="#1B2430">emp-alice</text>
+    <rect x="1608" y="106" width="112" height="26" rx="999" fill="#F2ECFB"/><text x="1664" y="123" font-size="10" font-weight="600" fill="#5B3B9B" text-anchor="middle">◈ Simulated SSO</text>
+    <!-- nav -->
+    <text x="1340" y="172" font-size="13" font-weight="600" fill="#1F5FBF">Book</text>
+    <rect x="1340" y="178" width="34" height="2" fill="#1F5FBF"/>
+    <text x="1392" y="172" font-size="13" fill="#5A6572">My bookings</text>
+
+    <!-- card -->
+    <rect x="1340" y="196" width="380" height="470" rx="10" fill="#FFFFFF" stroke="#D5DAE1"/>
+    <text x="1360" y="228" font-size="18" font-weight="600" fill="#1B2430">Book a space</text>
+    <rect x="1360" y="244" width="340" height="40" rx="6" fill="#E7EEFB"/><text x="1372" y="269" font-size="12" fill="#184C99">ⓘ 12 desks · 5 parking free — Mon 28 Sep, AM</text>
+
+    <text x="1360" y="312" font-size="13" font-weight="600" fill="#1B2430">Work date</text>
+    <rect x="1360" y="320" width="340" height="40" rx="6" fill="#FFFFFF" stroke="#D5DAE1"/><text x="1374" y="345" font-size="14" fill="#1B2430">Mon 28 Sep 2026</text>
+    <text x="1360" y="378" font-size="11" fill="#5A6572">Weekdays only, up to 14 days ahead · Europe/Belgrade</text>
+
+    <text x="1360" y="410" font-size="13" font-weight="600" fill="#1B2430">Period</text>
+    <rect x="1360" y="418" width="108" height="38" rx="8" fill="#1F5FBF"/><text x="1414" y="442" font-size="12" font-weight="600" fill="#FFFFFF" text-anchor="middle">Morning</text>
+    <rect x="1476" y="418" width="108" height="38" rx="8" fill="#FFFFFF" stroke="#D5DAE1"/><text x="1530" y="442" font-size="12" fill="#1B2430" text-anchor="middle">Afternoon</text>
+    <rect x="1592" y="418" width="108" height="38" rx="8" fill="#FFFFFF" stroke="#D5DAE1"/><text x="1646" y="442" font-size="12" fill="#1B2430" text-anchor="middle">Full day</text>
+
+    <text x="1360" y="486" font-size="13" font-weight="600" fill="#1B2430">Resource</text>
+    <rect x="1360" y="494" width="108" height="38" rx="8" fill="#1F5FBF"/><text x="1414" y="518" font-size="12" font-weight="600" fill="#FFFFFF" text-anchor="middle">Desk</text>
+    <rect x="1476" y="494" width="108" height="38" rx="8" fill="#FFFFFF" stroke="#D5DAE1"/><text x="1530" y="518" font-size="12" fill="#1B2430" text-anchor="middle">Parking</text>
+    <rect x="1592" y="494" width="108" height="38" rx="8" fill="#FFFFFF" stroke="#D5DAE1"/><text x="1646" y="518" font-size="12" fill="#1B2430" text-anchor="middle">Both</text>
+
+    <rect x="1580" y="606" width="120" height="40" rx="10" fill="#1F5FBF"/><text x="1640" y="631" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">Book</text>
+
+    <!-- confirmation card -->
+    <rect x="1340" y="686" width="380" height="180" rx="10" fill="#FFFFFF" stroke="#D5DAE1"/>
+    <rect x="1340" y="686" width="380" height="40" rx="10" fill="#E3F3E8"/>
+    <text x="1360" y="712" font-size="14" font-weight="600" fill="#1E6B3A">✓ Booking confirmed</text>
+    <text x="1360" y="752" font-size="13" fill="#5A6572">Date</text><text x="1560" y="752" font-size="13" font-weight="600" fill="#1B2430" text-anchor="end">Mon 28 Sep 2026</text>
+    <text x="1360" y="778" font-size="13" fill="#5A6572">Period</text><text x="1560" y="778" font-size="13" font-weight="600" fill="#1B2430" text-anchor="end">Morning</text>
+    <text x="1360" y="804" font-size="13" fill="#5A6572">Resource</text><text x="1560" y="804" font-size="13" font-weight="600" fill="#1B2430" text-anchor="end">Desk A1</text>
+    <text x="1360" y="830" font-size="13" fill="#5A6572">Status</text>
+    <rect x="1470" y="816" width="90" height="22" rx="999" fill="#E7EEFB"/><text x="1515" y="831" font-size="11" font-weight="600" fill="#184C99" text-anchor="middle">Reserved</text>
+  </g>
+
+  <!-- ============ FRAME 4: MY BOOKINGS ============ -->
+  <g id="Screen-MyBookings">
+    <rect x="1800" y="90" width="480" height="800" rx="14" fill="#F6F7F9" stroke="#D5DAE1"/>
+    <rect x="1800" y="90" width="480" height="56" rx="14" fill="#FFFFFF"/>
+    <rect x="1800" y="130" width="480" height="16" fill="#FFFFFF"/>
+    <text x="1820" y="124" font-size="15" font-weight="600" fill="#1B2430">Smart Office</text>
+    <rect x="1990" y="106" width="130" height="26" rx="6" fill="#FFFFFF" stroke="#D5DAE1"/><text x="1998" y="123" font-size="12" fill="#1B2430">emp-alice</text>
+    <rect x="2128" y="106" width="132" height="26" rx="999" fill="#F2ECFB"/><text x="2194" y="123" font-size="10" font-weight="600" fill="#5B3B9B" text-anchor="middle">◈ Simulated SSO</text>
+    <text x="1820" y="172" font-size="13" fill="#5A6572">Book</text>
+    <text x="1872" y="172" font-size="13" font-weight="600" fill="#1F5FBF">My bookings</text>
+    <rect x="1872" y="178" width="80" height="2" fill="#1F5FBF"/>
+    <rect x="2168" y="156" width="92" height="32" rx="10" fill="#FFFFFF" stroke="#D5DAE1"/><text x="2214" y="177" font-size="12" font-weight="600" fill="#1B2430" text-anchor="middle">↻ Refresh</text>
+
+    <!-- row 1: desk checked in / protected -->
+    <rect x="1820" y="204" width="440" height="96" rx="10" fill="#FFFFFF" stroke="#D5DAE1"/>
+    <text x="1840" y="234" font-size="15" font-weight="600" fill="#1B2430">🖥 Desk A1</text>
+    <text x="1840" y="256" font-size="12" fill="#5A6572">Mon 28 Sep · Full day</text>
+    <text x="1840" y="282" font-size="12" fill="#1E6B3A">Protected for this period.</text>
+    <rect x="2116" y="222" width="124" height="26" rx="999" fill="#E3F3E8"/><text x="2178" y="239" font-size="12" font-weight="600" fill="#1E6B3A" text-anchor="middle">✓ Checked in</text>
+
+    <!-- row 2: parking reserved, window open, check-in action -->
+    <rect x="1820" y="312" width="440" height="112" rx="10" fill="#FFFFFF" stroke="#D5DAE1"/>
+    <text x="1840" y="342" font-size="15" font-weight="600" fill="#1B2430">🅿 Parking P1</text>
+    <text x="1840" y="364" font-size="12" fill="#5A6572">Mon 28 Sep · Full day</text>
+    <text x="1840" y="390" font-size="12" fill="#8A5A00">◷ Check in before 10:00 · 07:42 left</text>
+    <rect x="2116" y="330" width="104" height="26" rx="999" fill="#E7EEFB"/><text x="2168" y="347" font-size="12" font-weight="600" fill="#184C99" text-anchor="middle">◷ Reserved</text>
+    <rect x="2116" y="372" width="124" height="38" rx="10" fill="#1F5FBF"/><text x="2178" y="396" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Check in</text>
+
+    <!-- row 3: released (post-worker) -->
+    <rect x="1820" y="436" width="440" height="120" rx="10" fill="#FFFFFF" stroke="#D5DAE1"/>
+    <text x="1840" y="466" font-size="15" font-weight="600" fill="#1B2430">🅿 Parking P2</text>
+    <text x="1840" y="488" font-size="12" fill="#5A6572">Tue 29 Sep · Morning</text>
+    <rect x="1840" y="500" width="300" height="34" rx="6" fill="#FCEBE7"/><text x="1852" y="522" font-size="12" fill="#A5341E">Released — free to book again.</text>
+    <rect x="2116" y="454" width="100" height="26" rx="999" fill="#FCEBE7"/><text x="2166" y="471" font-size="12" font-weight="600" fill="#A5341E" text-anchor="middle">↩ Released</text>
+    <rect x="2150" y="500" width="110" height="34" rx="10" fill="#FFFFFF" stroke="#1F5FBF"/><text x="2205" y="522" font-size="12" font-weight="600" fill="#1F5FBF" text-anchor="middle">Book again</text>
+
+    <!-- FR-09 caption -->
+    <rect x="1820" y="576" width="440" height="60" rx="10" fill="#FDF3E1"/>
+    <text x="1840" y="602" font-size="12" font-weight="600" fill="#8A5A00">FR-09 automatic release (the demo moment)</text>
+    <text x="1840" y="622" font-size="11" fill="#8A5A00">No check-in by the deadline → worker flips the row to Released on next refresh.</text>
+
+    <!-- empty state note -->
+    <text x="1820" y="674" font-size="12" font-weight="600" fill="#5A6572">Empty state</text>
+    <rect x="1820" y="686" width="440" height="80" rx="10" fill="#FFFFFF" stroke="#D5DAE1"/>
+    <text x="2040" y="722" font-size="13" fill="#5A6572" text-anchor="middle">No bookings yet.</text>
+    <rect x="1960" y="732" width="160" height="24" rx="8" fill="#1F5FBF"/><text x="2040" y="748" font-size="12" font-weight="600" fill="#FFFFFF" text-anchor="middle">Book a space</text>
+  </g>
+</svg>
