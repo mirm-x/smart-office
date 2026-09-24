@@ -1,0 +1,473 @@
+/* Tier-1 Smart Office design system. Tokens mirror docs/design/tier1-ui-spec.md
+   and docs/design/tier1-ui-tokens.json. Light theme only for the POC. */
+
+:root {
+  /* Colour */
+  --bg-canvas: #f6f7f9;
+  --bg-surface: #ffffff;
+  --bg-subtle: #eef1f4;
+  --border-default: #d5dae1;
+  --border-strong: #aeb6c2;
+  --text-primary: #1b2430;
+  --text-secondary: #5a6572;
+  --text-inverse: #ffffff;
+  --brand-600: #1f5fbf;
+  --brand-700: #184c99;
+  --focus-ring: #1f5fbf;
+
+  --status-reserved-bg: #e7eefb;
+  --status-reserved-text: #184c99;
+  --status-checkedin-bg: #e3f3e8;
+  --status-checkedin-text: #1e6b3a;
+  --status-released-bg: #fcebe7;
+  --status-released-text: #a5341e;
+  --status-cancelled-bg: #eef1f4;
+  --status-cancelled-text: #5a6572;
+  --status-warning-bg: #fdf3e1;
+  --status-warning-text: #8a5a00;
+  --status-simulated-bg: #f2ecfb;
+  --status-simulated-text: #5b3b9b;
+
+  /* Spacing (4pt) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-2: 0 4px 12px rgba(16, 24, 40, 0.1);
+
+  --content-max: 760px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.47;
+  color: var(--text-primary);
+  background: var(--bg-canvas);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--brand-600);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Layout ------------------------------------------------------------------ */
+.app-main {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-6) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+@media (max-width: 599px) {
+  .app-main {
+    padding: var(--space-4) var(--space-4) var(--space-7);
+  }
+}
+
+.screen-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Identity bar ------------------------------------------------------------ */
+.identity-bar {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+  box-shadow: var(--shadow-1);
+}
+
+.identity-bar__inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-2) var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.identity-bar__brand {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.identity-bar__id {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.identity-bar__label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Nav --------------------------------------------------------------------- */
+.app-nav {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-6) 0;
+  display: flex;
+  gap: var(--space-4);
+}
+
+.app-nav__link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid transparent;
+}
+
+.app-nav__link[aria-current="page"] {
+  color: var(--brand-600);
+  border-bottom-color: var(--brand-600);
+}
+
+/* Card -------------------------------------------------------------------- */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.card__title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Field ------------------------------------------------------------------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field__label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field__control {
+  height: 40px;
+  padding: 0 var(--space-3);
+  font-size: 15px;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+
+.field__control:focus-visible {
+  border-color: var(--brand-600);
+}
+
+.field--error .field__control {
+  border-color: var(--status-released-text);
+}
+
+.field__help {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.field--error .field__help {
+  color: var(--status-released-text);
+}
+
+/* Segmented control ------------------------------------------------------- */
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.segmented__option {
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.segmented__option[aria-pressed="true"],
+.segmented__option[aria-checked="true"] {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+  color: var(--text-inverse);
+}
+
+.segmented__option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Button ------------------------------------------------------------------ */
+.btn {
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn--sm {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  font-size: 13px;
+}
+
+.btn--primary {
+  background: var(--brand-600);
+  color: var(--text-inverse);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--brand-700);
+}
+
+.btn--secondary {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--brand-600);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Banner ------------------------------------------------------------------ */
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+.banner--info {
+  background: var(--status-reserved-bg);
+  color: var(--status-reserved-text);
+}
+
+.banner--success {
+  background: var(--status-checkedin-bg);
+  color: var(--status-checkedin-text);
+}
+
+.banner--error {
+  background: var(--status-released-bg);
+  color: var(--status-released-text);
+}
+
+.banner--warning {
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
+}
+
+.banner--simulated {
+  background: var(--status-simulated-bg);
+  color: var(--status-simulated-text);
+}
+
+/* Status badge ------------------------------------------------------------ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge--reserved {
+  background: var(--status-reserved-bg);
+  color: var(--status-reserved-text);
+}
+
+.badge--checked_in {
+  background: var(--status-checkedin-bg);
+  color: var(--status-checkedin-text);
+}
+
+.badge--released {
+  background: var(--status-released-bg);
+  color: var(--status-released-text);
+}
+
+.badge--cancelled {
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-text);
+}
+
+.tag-simulated {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--status-simulated-bg);
+  color: var(--status-simulated-text);
+}
+
+/* Definition list (confirmation) ------------------------------------------ */
+.summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+}
+
+.summary dt {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.summary dd {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Booking list ------------------------------------------------------------ */
+.booking-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.booking-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.booking-row__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.booking-row__resource {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.booking-row__sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.booking-row__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.muted {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
