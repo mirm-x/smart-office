@@ -1,0 +1,31 @@
+{
+  "name": "smart-office",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ZRS Camp 2026 - Smart Office desk & parking booking POC",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "worker": "tsx worker/release-worker.ts",
+    "db:migrate": "tsx db/migrate.ts"
+  },
+  "dependencies": {
+    "next": "14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "pg": "8.12.0",
+    "dotenv": "16.4.5",
+    "luxon": "3.4.4"
+  },
+  "devDependencies": {
+    "typescript": "5.5.4",
+    "@types/node": "20.14.10",
+    "@types/react": "18.3.3",
+    "@types/pg": "8.11.6",
+    "@types/luxon": "3.4.2",
+    "tsx": "4.16.2"
+  }
+}
