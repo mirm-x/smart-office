@@ -281,20 +281,20 @@ gantt
     axisFormat  %b %d
 
     section Discovery
-    On-site: workshops, site & tenant assessment          :crit, disc1, 2026-01-05, 2w
+    On-site -- workshops, site and tenant assessment       :crit, disc1, 2026-01-05, 2w
 
     section Feature 1 -- Auto-release + hardware
-    Implementation: release logic, sensor/LED integration :active, f1, after disc1, 3w
-    On-site: sensor & LED install, calibration            :crit, f1on, 2026-02-02, 1w
+    Implementation -- release logic, sensor/LED integration :active, f1, after disc1, 3w
+    On-site -- sensor and LED install, calibration          :crit, f1on, 2026-02-02, 1w
 
     section Feature 2 -- Easy booking, two ways
-    Implementation: map UI, Teams/Slack booking channel   :active, f2, after disc1, 3w
+    Implementation -- map UI, Teams/Slack booking channel   :active, f2, after disc1, 3w
 
     section Identity & hardening
-    Implementation: Entra sign-in, security/privacy pass  :active, hard1, after f1, 2w
+    Implementation -- Entra sign-in, security/privacy pass  :active, hard1, after f1, 2w
 
     section Pilot
-    On-site: training, acceptance, handover               :crit, pilot1, after hard1, 2w
+    On-site -- training, acceptance, handover               :crit, pilot1, after hard1, 2w
 
     section Contingency
     Schedule buffer (unbilled)                            :done, buf1, after pilot1, 2w
