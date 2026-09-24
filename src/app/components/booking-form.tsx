@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useIdentity } from "./identity";
 
@@ -570,9 +571,9 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
           </dl>
           <div className="row-between">
             <span className="muted">Manage check-in in My bookings.</span>
-            <a className="btn btn--secondary btn--sm" href="/bookings">
+            <Link className="btn btn--secondary btn--sm" href="/bookings">
               Go to My bookings
-            </a>
+            </Link>
           </div>
         </div>
       )}

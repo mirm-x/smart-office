@@ -21,6 +21,12 @@ evidence, the recording and the client proposal.**
    employee books via "Book and check in now"; otherwise show the released
    status and the next allowed booking. A timely check-in is never released.
 
+**Requested addition:** an employee can cancel their own reserved desk or
+parking booking before check-in. Cancelling one resource in a combined request
+leaves the other alone. A full-day cancellation covers both reserved halves of
+that resource. Repeating it adds no audit entry; checked-in bookings cannot be
+cancelled in this POC.
+
 ## Tier 2 -- focused checks before making those claims
 
 1. Two concurrent requests for the same resource/period: one success, one

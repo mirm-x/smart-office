@@ -12,7 +12,7 @@ for the Agentic SDLC this repo follows.
 
 ## Status
 
-The booking and My bookings screens, booking/check-in service and no-show
+The booking and My bookings screens, booking/check-in/cancellation service and no-show
 release worker are implemented. Half-day booking is **pending a written
 facilitator decision** (`docs/decisions/0001-half-day-booking-policy.md`) and
 defaults off until accepted. The conversational assistant and sensor/LED
@@ -34,6 +34,7 @@ npm run db:migrate          # applies db/migrations/*.sql, including seed data
 
 npm run dev                 # Next.js app on http://localhost:3000
 npm run worker              # in a second terminal: automatic release worker
+npm test                    # focused cancellation checks, no database needed
 ```
 
 ## Try the API
@@ -64,6 +65,10 @@ test data with a near-term deadline instead of waiting for the 10:00/14:00
 policy cutoffs. A released space can be booked in a later open period; booking
 and checking in during the same period after its deadline is pending the
 facilitator decision.
+
+To try cancellation instead, find a reserved desk or parking row in **My
+bookings**, then select **Cancel booking** and confirm. The other resource in a combined
+request stays booked. A checked-in booking cannot be cancelled in this POC.
 
 ## Project structure
 

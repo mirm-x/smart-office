@@ -316,8 +316,10 @@ Below: a vertical list of booking `Card`s (one per claim). Each row:
 - **Primary action per status:**
   - `reserved`, window open → `Button primary sm` **Check in**.
   - `reserved`, before window → **Check in** disabled + Countdown `not-open`.
-  - `reserved`, after deadline → no button; Countdown `closed` (worker will
+  - `reserved`, after deadline → no check-in button; Countdown `closed` (worker will
     release; row flips to `released` on next refresh).
+  - `reserved` → **Cancel** opens an inline confirmation. Confirming cancels
+    this desk or parking booking only; the row becomes `cancelled` after refresh.
   - `checked_in` → no action; helper text `Protected for this period.`
   - `released` → `Banner info` inline `Released — this space is free to book
     again.` + `Button ghost sm` **Book again** (→ Book screen).
@@ -367,6 +369,7 @@ Check-in (`POST /api/bookings/:requestId/checkin`):
 | `not_owner` | `You can only check in to your own booking.` |
 | `not_found` | `We couldn't find that booking.` |
 | `already_released` | `This booking was released and can't be checked in.` |
+| `already_cancelled` | `This booking was cancelled and can't be checked in.` |
 
 Generic network/500 → `Something went wrong. Please try again.`
 

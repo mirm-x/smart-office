@@ -43,7 +43,7 @@ for how this maps to the spec's exact FR/BR/QR numbering):
 
 | Capability area | What it covers | POC status |
 |---|---|---|
-| Resource booking | Desk + parking booking via a visual map of the office floor and parking lot, morning/afternoon/full-day choice (pending facilitator decision), combined atomic requests, 14-day horizon | **Built** (FR-03); POC offers a specific-space picker on an illustrative synthetic layout or automatic assignment. A site-accurate floor plan is full-delivery scope. |
+| Resource booking | Desk + parking booking via a visual map of the office floor and parking lot, morning/afternoon/full-day choice (pending facilitator decision), combined atomic requests, 14-day horizon | **Built** (FR-03); POC offers a specific-space picker on an illustrative synthetic layout or automatic assignment, plus cancellation before check-in. A site-accurate floor plan is full-delivery scope. |
 | Check-in & automatic release | App check-in within a deadline protects a booking; a no-show releases it for someone else | **Built** (FR-08, FR-09) |
 | Conversational booking | A faster, complementary path to the same map-based booking: natural-language request ("parking and a desk tomorrow afternoon") through Teams/Slack, routed through the same validated booking service; opens the door to automating the booking operation | Guided-chat prototype or live AI service, labelled accordingly |
 | Occupancy sensing & indicators | Desk/parking presence sensors, LED status (bookable / reserved / in use / needs review), usage evidence and exceptions on mismatch | Simulated in the POC |

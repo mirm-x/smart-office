@@ -5,7 +5,7 @@
 ## At a glance
 
 - **The offer:** A complete desk and parking booking system for a company with about 200 employees, 150 desks and 30 parking spaces. The design must support multiple offices and at least 5,000 users.
-- **The camp POC:** Demonstrate three connected functions: **booking (FR-03), check-in (FR-08) and automatic release (FR-09)**.
+- **The camp POC:** Demonstrate three connected functions: **booking (FR-03), check-in (FR-08) and automatic release (FR-09)**. Employee cancellation is a small requested addition to the booking UI.
 - **The new booking choice:** Employees can select **morning half-day, afternoon half-day or full day**. This extends the supplied specification, which originally calls for working-day bookings.
 - **The submission:** No more than **10 proposal slides**, plus the repository, run instructions and POC access or a backup recording, by **14:00 on Day 2**.
 - **The central message:** A timely check-in protects a reservation. A no-show releases it after the relevant deadline so someone else can book the space.
@@ -73,6 +73,11 @@ The written brief asks for a **focused POC**, so the team will not treat every f
 3. A combined desk-plus-parking request creates both bookings or neither when one resource is unavailable.
 4. Check-in at the deadline is late. Another employee cannot check in to a booking they do not own, and a late event cannot restore a released booking.
 5. Repeating the release worker produces no second state change or audit action. A checked-in full-day booking stays protected for both halves.
+
+**Requested booking action: cancellation**
+
+- An employee may cancel their own reserved desk or parking booking. For a full-day booking, cancelling one resource cancels both of its reserved half-day claims; the other resource in a combined request stays as it was.
+- Cancellation is unavailable after check-in. A repeated cancellation makes no further change or audit entry. A cancelled claim no longer blocks the resource or the employee's booking limit.
 
 **Follow-up acceptance for full delivery, or camp stretch work after the demo is safe**
 

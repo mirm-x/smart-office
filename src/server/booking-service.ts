@@ -230,7 +230,7 @@ async function pickAvailableResource(
 
 export type CheckInResult =
   | { ok: true; claimIds: string[]; alreadyCheckedIn: boolean }
-  | { ok: false; reason: "not_found" | "not_owner" | "too_early" | "too_late" | "already_released" };
+  | { ok: false; reason: "not_found" | "not_owner" | "too_early" | "too_late" | "already_released" | "already_cancelled" };
 
 interface ClaimRow {
   id: string;
@@ -291,7 +291,11 @@ export async function checkIn(
       await client.query("commit");
       return { ok: true, claimIds: claims.rows.map((c) => c.id), alreadyCheckedIn: true };
     }
-    if (claims.rows.some((c) => c.status === "released" || c.status === "cancelled")) {
+    if (claims.rows.some((c) => c.status === "cancelled")) {
+      await client.query("rollback");
+      return { ok: false, reason: "already_cancelled" };
+    }
+    if (claims.rows.some((c) => c.status === "released")) {
       await client.query("rollback");
       return { ok: false, reason: "already_released" };
     }
@@ -320,6 +324,83 @@ export async function checkIn(
 
     await client.query("commit");
     return { ok: true, claimIds, alreadyCheckedIn: false };
+  } catch (err) {
+    await client.query("rollback");
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+export type CancelBookingResult =
+  | { ok: true; claimIds: string[]; alreadyCancelled: boolean }
+  | { ok: false; reason: "not_found" | "not_owner" | "already_checked_in" | "already_released" };
+
+interface CancellationClaimRow {
+  id: string;
+  status: "reserved" | "checked_in" | "released" | "cancelled";
+  employee_id: string;
+}
+
+export async function cancelBooking(
+  requestId: string,
+  resourceType: ResourceType,
+  employeeExternalId: string
+): Promise<CancelBookingResult> {
+  const client = await db.connect();
+  try {
+    await client.query("begin");
+
+    const employee = await client.query<{ id: string }>(
+      "select id from employees where external_id = $1 and active = true",
+      [employeeExternalId]
+    );
+    if (employee.rowCount === 0) {
+      await client.query("rollback");
+      return { ok: false, reason: "not_owner" };
+    }
+
+    // Lock both halves of this resource before changing either one.
+    const claims = await client.query<CancellationClaimRow>(
+      `select id, status, employee_id
+         from booking_claims
+        where request_id = $1 and resource_type = $2
+        for update`,
+      [requestId, resourceType]
+    );
+    if (claims.rowCount === 0) {
+      await client.query("rollback");
+      return { ok: false, reason: "not_found" };
+    }
+    if (claims.rows.some((claim) => claim.employee_id !== employee.rows[0]!.id)) {
+      await client.query("rollback");
+      return { ok: false, reason: "not_owner" };
+    }
+    if (claims.rows.some((claim) => claim.status === "checked_in")) {
+      await client.query("rollback");
+      return { ok: false, reason: "already_checked_in" };
+    }
+
+    const reserved = claims.rows.filter((claim) => claim.status === "reserved");
+    if (reserved.length === 0) {
+      if (claims.rows.every((claim) => claim.status === "cancelled")) {
+        await client.query("commit");
+        return { ok: true, claimIds: claims.rows.map((claim) => claim.id), alreadyCancelled: true };
+      }
+      await client.query("rollback");
+      return { ok: false, reason: "already_released" };
+    }
+
+    for (const claim of reserved) {
+      await client.query("update booking_claims set status = 'cancelled' where id = $1", [claim.id]);
+      await client.query(
+        "insert into audit_log (claim_id, event, actor, details) values ($1, 'cancelled', $2, $3::jsonb)",
+        [claim.id, employeeExternalId, JSON.stringify({ request_id: requestId, resource_type: resourceType })]
+      );
+    }
+
+    await client.query("commit");
+    return { ok: true, claimIds: reserved.map((claim) => claim.id), alreadyCancelled: false };
   } catch (err) {
     await client.query("rollback");
     throw err;
