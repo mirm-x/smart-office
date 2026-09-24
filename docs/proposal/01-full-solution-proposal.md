@@ -13,16 +13,16 @@ before treating any figure here as final.
 ## Value
 
 ### **A smarter way to use the space you already have.**
-We’re solving three things that matter in a Smart Office:
+Three things make this solution pay off, ranked by impact for a 300+ employee site:
 
-**Easy to book.**
-Employees simply ask for the desk or parking they need through a conversational assistant—no searching through complex booking grids.
+**#1 — Stop paying for space nobody uses.**
+Booked-but-empty desks and parking are freed the moment someone doesn't show up—automatically, backed by check-in and occupancy sensing, not a facilities team chasing no-shows. That space is instantly available to the next person who needs it. This is the direct real-estate payoff.
 
-**Use space more efficiently.**
-A booking is only valuable if the space is actually used. Check-in and real-time occupancy sensing make unused spaces visible and automatically release them, so someone else can use them.
+**#2 — Easy to book, two ways.**
+A visual map of the office floor and parking lot lets employees see and pick the exact spot they want. A natural-language request through the company's own channels (Teams, Slack—"a desk and parking tomorrow afternoon") gets the same result faster, through the same validated booking service—and opens the door to automating the booking operation itself.
 
-**Build it smarter with Agentic SDLC.**
-Our POC is not just a demo—it shows how an Agentic SDLC can accelerate delivery while keeping the right engineering discipline, context and quality throughout the process. The same approach can take the solution from a two-day POC to a scalable Smart Office platform across offices and thousands of employees.
+**#3 — A delivery model that de-risks the investment.**
+Our POC is not just a demo—it shows an Agentic SDLC where every decision is traceable and human-approved before it ships: no ungoverned output, no surprises at review. It's why this went from brief to a working proof of concept in two days, and why the same team and process can take the solution from a two-day POC to a 5,000-employee platform without a rewrite, on a predictable budget and timeline.
 
 ### **The result**
 **Less friction for employees. Better utilisation for the company. A delivery approach built to scale.**
@@ -43,10 +43,10 @@ for how this maps to the spec's exact FR/BR/QR numbering):
 
 | Capability area | What it covers | POC status |
 |---|---|---|
-| Resource booking | Desk + parking booking, morning/afternoon/full-day choice (pending facilitator decision), combined atomic requests, 14-day horizon | **Built** (FR-03) |
+| Resource booking | Desk + parking booking via a visual map of the office floor and parking lot, morning/afternoon/full-day choice (pending facilitator decision), combined atomic requests, 14-day horizon | **Built** (FR-03); POC auto-assigns a resource, the map-based picker is full-delivery scope |
 | Check-in & automatic release | App check-in within a deadline protects a booking; a no-show releases it for someone else | **Built** (FR-08, FR-09) |
-| Conversational booking | Natural-language request ("parking and a desk tomorrow afternoon"), routed through the same validated booking service | Guided-chat prototype or live AI service, labelled accordingly |
-| Occupancy sensing & indicators | Desk/parking presence sensors, LED status (bookable / reserved / in use / needs review), exceptions on mismatch | Simulated in the POC |
+| Conversational booking | A faster, complementary path to the same map-based booking: natural-language request ("parking and a desk tomorrow afternoon") through Teams/Slack, routed through the same validated booking service; opens the door to automating the booking operation | Guided-chat prototype or live AI service, labelled accordingly |
+| Occupancy sensing & indicators | Desk/parking presence sensors, LED status (bookable / reserved / in use / needs review), exceptions on mismatch—the hardware backbone behind automatic release | Simulated in the POC |
 | Identity | Corporate sign-in ties every action to a verified employee | Synthetic adapter in the POC; Microsoft Entra ID in full delivery |
 | Administration | Office hours, deadlines, check-in methods, resource states, configurable per office/resource type | Full-delivery scope |
 | Audit & reporting | Full audit trail of booking/check-in/release events (already logged in the POC's `audit_log` table); utilization and no-show reporting | Data captured in POC; reporting UI is full-delivery scope |
@@ -60,8 +60,9 @@ application rather than replacing it:
 
 - **Booking core** (proven in the POC): resources modelled as morning/afternoon
   claims, with database constraints -- not just application code -- enforcing
-  that no resource or employee holds two active overlapping claims. This is
-  the load-bearing design decision behind the "trustworthy booking" promise.
+  that no resource or employee holds two active overlapping claims, regardless
+  of which surface (map UI, chat) created the request. This is the
+  load-bearing design decision behind the "trustworthy booking" promise.
 - **Identity**: Microsoft Entra ID for sign-in; server-side ownership and
   admin checks on every action (an employee sign-in establishes identity, an
   app check-in establishes declared arrival -- kept as two distinct events).
