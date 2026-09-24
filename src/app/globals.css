@@ -453,6 +453,329 @@ a {
   font-size: 13px;
 }
 
+/* Availability hero (Shazam-style: big, confident numbers) ---------------- */
+.avail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.avail__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.avail-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.avail-stat--free {
+  background: var(--status-checkedin-bg);
+  border-color: transparent;
+}
+
+.avail-stat--none {
+  background: var(--status-released-bg);
+  border-color: transparent;
+}
+
+.avail-stat__num {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.avail-stat--free .avail-stat__num {
+  color: var(--status-checkedin-text);
+}
+
+.avail-stat--none .avail-stat__num {
+  color: var(--status-released-text);
+}
+
+.avail-stat__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.avail__caption {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Period option cards ----------------------------------------------------- */
+.period-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.period-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--space-3);
+  text-align: left;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.period-option:hover {
+  border-color: var(--border-strong);
+}
+
+.period-option[aria-checked="true"] {
+  border-color: var(--brand-600);
+  background: var(--status-reserved-bg);
+  box-shadow: inset 0 0 0 1px var(--brand-600);
+}
+
+.period-option__label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.period-option__hours {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.period-option__checkin {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.period-option[aria-checked="true"] .period-option__checkin {
+  color: var(--status-reserved-text);
+}
+
+/* Floor map (zoned office plan) ------------------------------------------- */
+.floorplan {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background-image: linear-gradient(rgba(174, 182, 194, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(174, 182, 194, 0.14) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Non-bookable amenity zones (decorative context). */
+.floorplan__zones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.zone {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 74px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px dashed rgba(27, 36, 48, 0.18);
+}
+
+.zone__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.zone__note {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.zone__tag {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.zone--greenery {
+  background: #e3f3e8;
+}
+.zone--piazza {
+  background: #fdf3d6;
+}
+.zone--collab {
+  background: #e2ecfb;
+}
+.zone--workshop {
+  background: #fbe4de;
+}
+
+/* Bookable clusters (desks / parking) -- elevated tiles, blue = available. */
+.floorplan__bookable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.plan-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+
+.plan-cluster__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.plan-cluster__title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.plan-cluster__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-tiles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: var(--space-2);
+}
+
+.ptile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  text-align: center;
+}
+
+.ptile--free {
+  background: var(--status-reserved-bg);
+  border-color: var(--brand-600);
+  box-shadow: inset 0 0 0 1px var(--brand-600);
+}
+
+.ptile--free .ptile__glyph {
+  color: var(--brand-600);
+}
+
+.ptile--taken {
+  background: var(--bg-subtle);
+  opacity: 0.72;
+}
+
+.ptile--taken .ptile__glyph {
+  color: var(--border-strong);
+}
+
+.ptile__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ptile__state {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.ptile--free .ptile__state {
+  color: var(--brand-700);
+}
+
+.plan-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.plan-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.plan-legend__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.plan-legend__swatch--free {
+  background: var(--status-reserved-bg);
+  border: 1px solid var(--brand-600);
+}
+
+.plan-legend__swatch--taken {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-strong);
+}
+
+.plan-legend__swatch--zone {
+  background: #fdf3d6;
+  border: 1px dashed rgba(27, 36, 48, 0.3);
+}
+
+@media (max-width: 599px) {
+  .period-grid {
+    grid-template-columns: 1fr;
+  }
+  .floorplan {
+    grid-template-columns: 1fr;
+  }
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

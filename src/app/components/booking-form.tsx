@@ -5,6 +5,19 @@ import { useIdentity } from "./identity";
 
 type Period = "morning" | "afternoon" | "full_day";
 type ResourceChoice = "desk" | "parking" | "both";
+type ResourceType = "desk" | "parking";
+
+interface ResourceAvailability {
+  type: ResourceType;
+  label: string;
+  free: boolean;
+}
+
+interface Availability {
+  desk: number;
+  parking: number;
+  resources: ResourceAvailability[];
+}
 
 const MAX_HORIZON_DAYS = 14;
 
@@ -25,13 +38,15 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 }
 
-const PERIOD_LABEL: Record<Period, string> = {
-  morning: "Morning",
-  afternoon: "Afternoon",
-  full_day: "Full day",
+// Display copy for the booking periods. Hours and the check-in deadline mirror
+// src/server/booking-policy.ts (PERIOD_WINDOWS), the source of truth.
+const PERIOD_META: Record<Period, { label: string; hours: string; checkin: string }> = {
+  morning: { label: "Morning", hours: "09:00 – 13:00", checkin: "check in by 10:00" },
+  afternoon: { label: "Afternoon", hours: "13:00 – 17:00", checkin: "check in by 14:00" },
+  full_day: { label: "Full day", hours: "09:00 – 17:00", checkin: "check in by 10:00" },
 };
 
-const RESOURCE_TYPES: Record<ResourceChoice, ("desk" | "parking")[]> = {
+const RESOURCE_TYPES: Record<ResourceChoice, ResourceType[]> = {
   desk: ["desk"],
   parking: ["parking"],
   both: ["desk", "parking"],
@@ -53,6 +68,72 @@ interface Confirmation {
   resources: { type: "desk" | "parking"; label: string }[];
 }
 
+function ResourceGlyph({ type }: { type: ResourceType }) {
+  // Simulated floor-plan glyph (illustrative). Desk = seat-at-table, parking = car.
+  if (type === "desk") {
+    return (
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+        <rect x="3" y="11" width="18" height="3" rx="1" fill="currentColor" />
+        <rect x="4" y="14" width="2" height="6" rx="1" fill="currentColor" />
+        <rect x="18" y="14" width="2" height="6" rx="1" fill="currentColor" />
+        <circle cx="12" cy="6.5" r="3" fill="currentColor" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+      <path
+        d="M5 13l1.4-4.2A2 2 0 0 1 8.3 7.4h7.4a2 2 0 0 1 1.9 1.4L19 13v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H8v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-5z"
+        fill="currentColor"
+      />
+      <circle cx="8" cy="15.5" r="1.1" fill="var(--bg-surface)" />
+      <circle cx="16" cy="15.5" r="1.1" fill="var(--bg-surface)" />
+    </svg>
+  );
+}
+
+// Non-bookable amenity zones shown for context on the floor plan. Illustrative
+// only -- they are NOT rentable spaces (greenery, piazza, lounge, workshop),
+// mirroring the real office plan the client shared.
+const PLAN_ZONES: { key: string; label: string; note: string }[] = [
+  { key: "greenery", label: "Greenery", note: "Planted area" },
+  { key: "piazza", label: "Piazza", note: "Open communal" },
+  { key: "collab", label: "Collab", note: "Lounge / meeting" },
+  { key: "workshop", label: "Workshop", note: "Event space" },
+];
+
+function BookableCluster({ title, type, resources }: { title: string; type: ResourceType; resources: ResourceAvailability[] }) {
+  const items = resources.filter((r) => r.type === type);
+  if (items.length === 0) return null;
+  const free = items.filter((r) => r.free).length;
+  return (
+    <div className="plan-cluster">
+      <div className="plan-cluster__head">
+        <span className="plan-cluster__title">{title}</span>
+        <span className="plan-cluster__count">
+          {free}/{items.length} free
+        </span>
+      </div>
+      <ul className="plan-tiles" role="list">
+        {items.map((r) => (
+          <li
+            key={r.label}
+            className={`ptile ${r.free ? "ptile--free" : "ptile--taken"}`}
+            aria-label={`${r.label}: ${r.free ? "free" : "taken"}`}
+            title={`${r.label} — ${r.free ? "free" : "taken"}`}
+          >
+            <span className="ptile__glyph">
+              <ResourceGlyph type={type} />
+            </span>
+            <span className="ptile__label">{r.label}</span>
+            <span className="ptile__state">{r.free ? "Free" : "Taken"}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
   const { identity } = useIdentity();
 
@@ -66,7 +147,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
   const [workDate, setWorkDate] = useState(() => toISODate(nextWorkday()));
   const [period, setPeriod] = useState<Period>(halfDayEnabled ? "morning" : "full_day");
   const [resource, setResource] = useState<ResourceChoice>("desk");
-  const [availability, setAvailability] = useState<{ desk: number; parking: number } | null>(null);
+  const [availability, setAvailability] = useState<Availability | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
   const [banner, setBanner] = useState<{ tone: "error"; text: string } | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
@@ -89,7 +170,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
         return;
       }
       const data = await res.json();
-      setAvailability({ desk: data.desk, parking: data.parking });
+      setAvailability({ desk: data.desk, parking: data.parking, resources: data.resources ?? [] });
     } catch {
       setAvailability(null);
     }
@@ -142,6 +223,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
   }
 
   const periodOptions: Period[] = halfDayEnabled ? ["morning", "afternoon", "full_day"] : ["full_day"];
+  const meta = PERIOD_META[period];
 
   return (
     <>
@@ -153,15 +235,33 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
         </div>
       )}
 
+      {/* Punchy availability overview -- big, confident numbers first. */}
+      <section className="avail" aria-live="polite" aria-label="Availability">
+        {availability ? (
+          <>
+            <div className="avail__stats">
+              <div className={`avail-stat ${availability.desk > 0 ? "avail-stat--free" : "avail-stat--none"}`}>
+                <span className="avail-stat__num">{availability.desk}</span>
+                <span className="avail-stat__label">desk{availability.desk === 1 ? "" : "s"} free</span>
+              </div>
+              <div className={`avail-stat ${availability.parking > 0 ? "avail-stat--free" : "avail-stat--none"}`}>
+                <span className="avail-stat__num">{availability.parking}</span>
+                <span className="avail-stat__label">parking free</span>
+              </div>
+            </div>
+            <p className="avail__caption">
+              {formatDate(workDate)} · {meta.label}, {meta.hours}
+            </p>
+          </>
+        ) : (
+          <p className="avail__caption">
+            {isWeekend ? "Weekends are closed — pick a weekday." : "Pick a weekday to see what's free."}
+          </p>
+        )}
+      </section>
+
       <form className="card" onSubmit={handleSubmit} aria-describedby="book-help">
         <h2 className="card__title">Reserve a desk or parking space</h2>
-
-        {availability && (
-          <div className="banner banner--info" role="status" aria-live="polite">
-            ⓘ {availability.desk} desk{availability.desk === 1 ? "" : "s"} · {availability.parking} parking free for{" "}
-            {formatDate(workDate)}, {PERIOD_LABEL[period].toLowerCase()}.
-          </div>
-        )}
 
         <div className={`field${dateError ? " field--error" : ""}`}>
           <label className="field__label" htmlFor="work-date">
@@ -185,19 +285,24 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
 
         <fieldset className="field" style={{ border: 0, padding: 0, margin: 0 }}>
           <legend className="field__label">Period</legend>
-          <div className="segmented" role="radiogroup" aria-label="Booking period">
-            {periodOptions.map((p) => (
-              <button
-                key={p}
-                type="button"
-                role="radio"
-                aria-checked={period === p}
-                className="segmented__option"
-                onClick={() => setPeriod(p)}
-              >
-                {PERIOD_LABEL[p]}
-              </button>
-            ))}
+          <div className="period-grid" role="radiogroup" aria-label="Booking period">
+            {periodOptions.map((p) => {
+              const m = PERIOD_META[p];
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  role="radio"
+                  aria-checked={period === p}
+                  className="period-option"
+                  onClick={() => setPeriod(p)}
+                >
+                  <span className="period-option__label">{m.label}</span>
+                  <span className="period-option__hours">{m.hours}</span>
+                  <span className="period-option__checkin">{m.checkin}</span>
+                </button>
+              );
+            })}
           </div>
           {!halfDayEnabled && <span className="field__help">Half-day booking is not enabled — full day only.</span>}
         </fieldset>
@@ -220,6 +325,47 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
           </div>
         </fieldset>
 
+        {/* Floor map -- illustrative office layout, live free/taken status.
+            Coloured zones are amenities and are NOT bookable. */}
+        {availability && availability.resources.length > 0 && (
+          <div className="field" role="group" aria-label="Floor map">
+            <div className="row-between">
+              <span className="field__label">Floor map</span>
+              <span className="tag-simulated">Simulated layout · live status</span>
+            </div>
+            <div className="floorplan">
+              <div className="floorplan__zones" aria-hidden="true">
+                {PLAN_ZONES.map((z) => (
+                  <div key={z.key} className={`zone zone--${z.key}`}>
+                    <span className="zone__label">{z.label}</span>
+                    <span className="zone__note">{z.note}</span>
+                    <span className="zone__tag">Not bookable</span>
+                  </div>
+                ))}
+              </div>
+              <div className="floorplan__bookable">
+                {(resource === "desk" || resource === "both") && (
+                  <BookableCluster title="Desks" type="desk" resources={availability.resources} />
+                )}
+                {(resource === "parking" || resource === "both") && (
+                  <BookableCluster title="Parking" type="parking" resources={availability.resources} />
+                )}
+              </div>
+            </div>
+            <div className="plan-legend" aria-hidden="true">
+              <span className="plan-legend__item">
+                <span className="plan-legend__swatch plan-legend__swatch--free" /> Free
+              </span>
+              <span className="plan-legend__item">
+                <span className="plan-legend__swatch plan-legend__swatch--taken" /> Taken
+              </span>
+              <span className="plan-legend__item">
+                <span className="plan-legend__swatch plan-legend__swatch--zone" /> Amenity · not bookable
+              </span>
+            </div>
+          </div>
+        )}
+
         {banner && (
           <div className="banner banner--error" role="alert">
             ⚠ {banner.text}
@@ -228,7 +374,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
 
         <div className="row-between">
           <span className="muted" id="book-help">
-            A resource is assigned automatically on booking.
+            A free resource is assigned automatically on booking.
           </span>
           <button type="submit" className="btn btn--primary" disabled={!identity || submitting}>
             {submitting ? "Booking…" : "Book"}
@@ -243,7 +389,9 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
             <dt>Date</dt>
             <dd>{formatDate(confirmation.workDate)}</dd>
             <dt>Period</dt>
-            <dd>{PERIOD_LABEL[confirmation.period]}</dd>
+            <dd>
+              {PERIOD_META[confirmation.period].label} · {PERIOD_META[confirmation.period].hours}
+            </dd>
             <dt>Resource</dt>
             <dd>{confirmation.resources.map((r) => r.label).join(" + ")}</dd>
             <dt>Status</dt>

@@ -96,17 +96,25 @@ export async function listEmployeeBookings(employeeExternalId: string): Promise<
   return [...groups.values()];
 }
 
+export interface ResourceAvailability {
+  type: ResourceType;
+  label: string;
+  free: boolean;
+}
+
 export interface AvailabilityResult {
   workDate: string;
   period: Period;
   desk: number;
   parking: number;
+  resources: ResourceAvailability[];
 }
 
 /**
- * Counts active resources of each type with no reserved/checked-in claim for
- * any half-day period the requested `period` occupies. Backs the Book screen
- * availability hint; authoritative allocation still happens in
+ * Per-resource free/taken status for a date + period, plus free counts by type.
+ * A resource is free when it has no reserved/checked-in claim for any half-day
+ * period the requested `period` occupies. Backs the Book screen availability
+ * hero and floor map; authoritative allocation still happens in
  * booking-service.createBooking. Returns null for a non-bookable date.
  */
 export async function getAvailability(workDate: string, period: Period): Promise<AvailabilityResult | null> {
@@ -114,23 +122,28 @@ export async function getAvailability(workDate: string, period: Period): Promise
     return null;
   }
   const claimPeriods = claimsForPeriod(period);
-  const counts: Record<ResourceType, number> = { desk: 0, parking: 0 };
-  for (const type of ["desk", "parking"] as ResourceType[]) {
-    const res = await db.query<{ free: number }>(
-      `select count(*)::int as free
-         from resources r
-        where r.type = $1
-          and r.status = 'active'
-          and not exists (
-            select 1 from booking_claims bc
-             where bc.resource_id = r.id
-               and bc.work_date = $2
-               and bc.period = any($3::text[])
-               and bc.status in ('reserved', 'checked_in')
-          )`,
-      [type, workDate, claimPeriods]
-    );
-    counts[type] = Number(res.rows[0]?.free ?? 0);
-  }
-  return { workDate, period, desk: counts.desk, parking: counts.parking };
+  const res = await db.query<{ type: ResourceType; label: string; free: boolean }>(
+    `select r.type,
+            r.label,
+            not exists (
+              select 1 from booking_claims bc
+               where bc.resource_id = r.id
+                 and bc.work_date = $1
+                 and bc.period = any($2::text[])
+                 and bc.status in ('reserved', 'checked_in')
+            ) as free
+       from resources r
+      where r.status = 'active'
+      order by r.type, r.label`,
+    [workDate, claimPeriods]
+  );
+
+  const resources: ResourceAvailability[] = res.rows.map((row) => ({
+    type: row.type,
+    label: row.label,
+    free: row.free,
+  }));
+  const desk = resources.filter((r) => r.type === "desk" && r.free).length;
+  const parking = resources.filter((r) => r.type === "parking" && r.free).length;
+  return { workDate, period, desk, parking, resources };
 }
