@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAvailability } from "@/server/booking-queries";
-import { Period } from "@/server/booking-policy";
+import { Period, canCheckInSameDay } from "@/server/booking-policy";
 
 const PERIODS: Period[] = ["morning", "afternoon", "full_day"];
 
@@ -17,6 +17,9 @@ export async function GET(req: NextRequest) {
   const result = await getAvailability(workDate, period);
   if (!result) {
     return NextResponse.json({ error: "invalid_date" }, { status: 422 });
+  }
+  if (!canCheckInSameDay(workDate, period)) {
+    return NextResponse.json({ error: "checkin_window_closed" }, { status: 409 });
   }
   return NextResponse.json(result, { status: 200 });
 }

@@ -13,10 +13,10 @@ before treating any figure here as final.
 ## Value
 
 ### **A smarter way to use the space you already have.**
-Three things make this solution pay off, ranked by impact for a 300+ employee site:
+Three things make this solution pay off for the client's office of about 200 employees:
 
 **#1 — Stop paying for space nobody uses.**
-Booked-but-empty desks and parking are freed the moment someone doesn't show up—automatically, backed by check-in and occupancy sensing, not a facilities team chasing no-shows. That space is instantly available to the next person who needs it. This is the direct real-estate payoff.
+Bookings without accepted check-in are released automatically at the agreed deadline, so unused desks and parking return for the next permitted booking. Occupancy sensing can help confirm use and flag mismatches. The pilot will measure how often released spaces are reused.
 
 **#2 — Easy to book, two ways.**
 A visual map of the office floor and parking lot lets employees see and pick the exact spot they want. A natural-language request through the company's own channels (Teams, Slack—"a desk and parking tomorrow afternoon") gets the same result faster, through the same validated booking service—and opens the door to automating the booking operation itself.
@@ -46,7 +46,7 @@ for how this maps to the spec's exact FR/BR/QR numbering):
 | Resource booking | Desk + parking booking via a visual map of the office floor and parking lot, morning/afternoon/full-day choice (pending facilitator decision), combined atomic requests, 14-day horizon | **Built** (FR-03); POC auto-assigns a resource, the map-based picker is full-delivery scope |
 | Check-in & automatic release | App check-in within a deadline protects a booking; a no-show releases it for someone else | **Built** (FR-08, FR-09) |
 | Conversational booking | A faster, complementary path to the same map-based booking: natural-language request ("parking and a desk tomorrow afternoon") through Teams/Slack, routed through the same validated booking service; opens the door to automating the booking operation | Guided-chat prototype or live AI service, labelled accordingly |
-| Occupancy sensing & indicators | Desk/parking presence sensors, LED status (bookable / reserved / in use / needs review), exceptions on mismatch—the hardware backbone behind automatic release | Simulated in the POC |
+| Occupancy sensing & indicators | Desk/parking presence sensors, LED status (bookable / reserved / in use / needs review), usage evidence and exceptions on mismatch | Simulated in the POC |
 | Identity | Corporate sign-in ties every action to a verified employee | Synthetic adapter in the POC; Microsoft Entra ID in full delivery |
 | Administration | Office hours, deadlines, check-in methods, resource states, configurable per office/resource type | Full-delivery scope |
 | Audit & reporting | Full audit trail of booking/check-in/release events (already logged in the POC's `audit_log` table); utilization and no-show reporting | Data captured in POC; reporting UI is full-delivery scope |
