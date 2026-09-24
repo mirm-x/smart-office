@@ -14,15 +14,39 @@ async function releaseExpiredClaims(): Promise<number> {
   try {
     await client.query("begin");
 
-    const expired = await client.query<{ id: string; resource_id: string }>(
-      `select id, resource_id
+    const expired = await client.query<{ id: string; resource_id: string; request_id: string }>(
+      `select id, resource_id, request_id
          from booking_claims
         where status = 'reserved'
           and checkin_deadline <= now()
         for update skip locked`
     );
 
-    for (const claim of expired.rows) {
+    // Plan section 2: a full-day no-show is released from the first deadline
+    // (10:00), so the still-reserved halves of the same request must not stay
+    // reserved until their own later deadlines (e.g. the afternoon 14:00).
+    const siblingRequestIds = expired.rows.map((row) => row.request_id);
+    const siblings = siblingRequestIds.length
+      ? await client.query<{ id: string; resource_id: string }>(
+          `select bc.id, bc.resource_id
+             from booking_claims bc
+             join booking_requests br on br.id = bc.request_id
+            where br.period = 'full_day'
+              and br.id = any($1::uuid[])
+              and bc.status = 'reserved'
+            for update skip locked`,
+          [siblingRequestIds]
+        )
+      : { rows: [] as { id: string; resource_id: string }[] };
+
+    const seen = new Set<string>();
+    const toRelease = [...expired.rows, ...siblings.rows].filter((row) => {
+      if (seen.has(row.id)) return false;
+      seen.add(row.id);
+      return true;
+    });
+
+    for (const claim of toRelease) {
       await client.query(
         "update booking_claims set status = 'released', released_at = now() where id = $1",
         [claim.id]
@@ -51,7 +75,7 @@ async function releaseExpiredClaims(): Promise<number> {
     }
 
     await client.query("commit");
-    return expired.rowCount ?? 0;
+    return toRelease.length;
   } catch (err) {
     await client.query("rollback");
     throw err;

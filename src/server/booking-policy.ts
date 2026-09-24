@@ -76,6 +76,23 @@ export function claimWindow(workDate: string, claimPeriod: ClaimPeriod) {
   };
 }
 
+/** True when a booking for `period` on `workDate` would still be check-in-able
+ * on the day itself: once the period's check-in deadline has passed, a same-day
+ * booking would be released as a no-show before it could ever be checked in
+ * (plan section 2, "Bookings after a check-in deadline"). Future dates are
+ * always allowed; the earliest claim anchors the check (morning for full_day). */
+export function canCheckInSameDay(
+  workDate: string,
+  period: Period,
+  now: DateTime = DateTime.now().setZone(OFFICE_TIME_ZONE)
+): boolean {
+  const dt = DateTime.fromISO(workDate, { zone: OFFICE_TIME_ZONE });
+  if (!dt.isValid || !dt.hasSame(now, "day")) return true;
+  const anchor = claimsForPeriod(period)[0] ?? "morning";
+  const { checkinDeadlineAt } = claimWindow(workDate, anchor);
+  return now.toJSDate() < checkinDeadlineAt;
+}
+
 export function isWorkingDate(workDate: string): boolean {
   const dt = DateTime.fromISO(workDate, { zone: OFFICE_TIME_ZONE });
   return dt.isValid && dt.weekday >= 1 && dt.weekday <= 5; // Mon-Fri, per POC calendar

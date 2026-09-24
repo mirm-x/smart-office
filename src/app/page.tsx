@@ -9,6 +9,9 @@ export default function Home() {
       </p>
       <ul>
         <li>
+          <code>POST /api/auth/login</code> -- simulated sign-in (sets the session cookie)
+        </li>
+        <li>
           <code>POST /api/bookings</code> -- create a desk and/or parking booking
         </li>
         <li>
