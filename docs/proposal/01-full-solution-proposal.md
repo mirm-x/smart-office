@@ -126,15 +126,88 @@ specification -- they're just not what this bid builds or charges for.
 
 ## Delivery approach
 
-The engagement follows the same Agentic SDLC used to build the POC, scaled up
-(see `AGENTS.md` and the SDLC-for-full-delivery narrative for the full
-version):
+### Agentic SDLC: what it actually is
 
+**AI agents do the drafting; a named person makes every call that matters.**
+Agentic SDLC means AI agents actively participate across the development
+lifecycle -- not autocomplete, and not "hand the AI our spec and let it
+run." Agents plan, implement, test, inspect their own output and iterate
+against feedback. But intent, the quality bar, and every decision gate stay
+human: a named person on our team approves scope, approves design, and
+approves what ships. Nothing reaches production that a person didn't
+explicitly sign off on.
+
+To be clear about what this **isn't**: it isn't spinning up a few
+coding-tool agents and calling the process "agentic" -- agents need a
+defined responsibility, the right context and tools, a way to hand work to
+the next stage, and a validation loop, or they're just a faster typist. And
+it isn't one agent per classic SDLC role either (an "AI business analyst,"
+an "AI architect") -- that automates an org chart, not a workflow. What
+makes it agentic is how work flows between agent and human, not how many
+agents exist.
+
+### The workflow: where agents work, where you stay in control
+
+```mermaid
+flowchart LR
+    Brief(["Brief<br/>Human: client + product lead"])
+    Refine["Agent: refine brief<br/>clarify scope, draft acceptance criteria"]
+    GateAC{"Human gate<br/>Product/proposal lead<br/>approves acceptance criteria"}
+    Plan["Agent: plan<br/>implementation approach"]
+    GateDesign{"Human gate<br/>Technical lead<br/>approves design"}
+    Impl["Agent: implement<br/>code + tests"]
+    Check["Agent: independent checks<br/>tests, security scan"]
+    GateReview{"Human gate<br/>QA/evidence lead<br/>reviews evidence"}
+    GateAccept{"Human gate<br/>Product/proposal lead<br/>accepts &amp; ships"}
+    Ship(["Shipped -- audited, traceable"])
+
+    Brief --> Refine --> GateAC
+    GateAC -- approved --> Plan
+    GateAC -- revise --> Refine
+    Plan --> GateDesign
+    GateDesign -- approved --> Impl
+    GateDesign -- revise --> Plan
+    Impl --> Check --> GateReview
+    GateReview -- pass --> GateAccept
+    GateReview -- fail --> Impl
+    GateAccept --> Ship
+
+    classDef agent fill:#DCEBFF,stroke:#2F5C99,color:#0B2545
+    classDef human fill:#FFE8CC,stroke:#B5651D,color:#5C3A00
+    class Refine,Plan,Impl,Check agent
+    class GateAC,GateDesign,GateReview,GateAccept human
 ```
-Brief -> agent refinement -> human acceptance criteria -> agent plan
-      -> human design approval -> implementation -> independent checks/review
-      -> correction -> human acceptance
-```
+
+**Reading the diagram:** blue boxes are agent work -- drafting, planning,
+coding, testing. Orange diamonds are human gates, each owned by a named role
+from the Team below, matching the loop in this repository's `AGENTS.md`
+(Brief -> agent refinement -> human acceptance criteria -> agent plan ->
+human design approval -> implementation -> independent checks/review ->
+correction -> human acceptance). A failed check or a "revise" decision sends
+work back a step, never around it -- the loop only moves forward on an
+explicit human approval. This is the exact process that took the POC from a
+blank repository to a working, conflict-safe booking system in two days;
+scaling it doesn't change the shape of the loop, only who's staffed against
+it (see Delivery phases below).
+
+### Why this is worth paying for
+
+- **Speed without giving up governance.** The two-day POC isn't a claim, it's
+  what this loop already produced -- a booking system with database-enforced
+  conflict safety, not a slide deck.
+- **Nothing ships ungoverned.** Every decision -- scope, design, what shipped
+  -- has a name attached and a record. This proposal's own decision log
+  (`docs/decisions/`) is a live example of that trail. For a regulated or
+  audit-conscious business, that's a compliance asset, not a nice-to-have.
+- **Predictable cost and schedule.** The Delivery phases table below isn't a
+  guess padded for safety -- it's the same loop, costed per stage, because
+  it's the loop that already ran once.
+- **Scales without a rewrite or a handoff.** The team and process that built
+  this in two days is the same team and process staffed up for your pilot --
+  not a demo team handing off to a different delivery team once things get
+  "real."
+- **Not vibe coding. Not a dark factory.** A person is accountable at every
+  stage, by name, before anything moves forward.
 
 This bid adds: CI/CD automation around this loop, security/dependency
 scanning agents, and a governance gate (human release approval) at every
