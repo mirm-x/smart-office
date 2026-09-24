@@ -12,28 +12,17 @@ before treating any figure here as final.
 
 ## Value
 
-Employees can trust that every desk and parking spot they book will actually
-be there -- and free again the moment it isn't used, thanks to real-time
-occupancy sensing with live indicators that quietly reclaim wasted space.
-Booking itself is effortless: staff ask for what they need through a
-conversational assistant instead of hunting through a static grid. Every
-booking is tied to a verified employee identity via corporate sign-in, so
-usage is accountable and reporting is trustworthy from day one. And behind it
-all is a controlled, repeatable Agentic delivery process -- the same
-discipline that builds the two-day POC scales reliably to a multi-office,
-5,000-user rollout.
+### A booking doesn’t always mean the space is actually being used. That’s the gap we want to close.
 
-**Why the client should choose this team:** the proposal is not a slide deck
-built ahead of a demo -- the demo *is* the proposal's central mechanism (timely
-check-in protects a reservation; a no-show releases it) proven working end to
-end, with the exact database constraints and worker logic that would ship to
-production, not a mock.
+With our solution, employees can quickly book a desk or parking spot through a conversational assistant. They check in when they arrive, and if they don’t show up, the space is automatically released for someone else.
 
-**Measuring the value in a pilot:** booking completion rate, no-show release
-count, released spaces re-booked, employee complaints, and sensor/booking
-mismatches. Establish a baseline in the first weeks of the pilot before
-promising percentage improvements -- do not commit to a numeric uplift figure
-without one.
+That gives employees a better booking experience while helping the company **get more out of the space it already has**.
+
+And this isn’t just a concept. In the POC, we show the whole journey working end to end:
+
+**Book → Check in → Use → Release → Rebook**
+
+The same approach is built with an **Agentic SDLC**, giving us a structured way to move from a working two-day POC toward a solution that can scale across offices and thousands of employees.
 
 ## Complete specification coverage
 
