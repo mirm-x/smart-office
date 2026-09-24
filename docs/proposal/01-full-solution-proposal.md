@@ -27,9 +27,13 @@ Our POC is not just a demo—it shows how an Agentic SDLC can accelerate deliver
 ### **The result**
 **Less friction for employees. Better utilisation for the company. A delivery approach built to scale.**
 
-And we prove it end to end:
+The full solution will support this journey:
 
 **Book → Check in → Use → Release → Rebook**
+
+The POC demonstrates booking, check-in and automatic release. Immediate
+same-day rebooking after a check-in deadline remains subject to the written
+facilitator decision in `docs/decisions/0001-half-day-booking-policy.md`.
 
 ## Complete specification coverage
 

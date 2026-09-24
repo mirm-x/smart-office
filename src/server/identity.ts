@@ -1,12 +1,8 @@
 import { createHmac, timingSafeEqual } from "crypto";
 
-// SIMULATED identity adapter for the POC (plan section 4, "Identity"):
-// a synthetic sign-in (POST /api/auth/login) establishes a signed session
-// cookie, and the check-in route takes the employee identity from that
-// session instead of the request body -- a caller can no longer claim to be
-// someone else (acceptance criterion: check-in #4). Full delivery replaces
-// the simulated sign-in with Microsoft Entra ID behind the same session
-// check.
+// The demo sign-in lets a tester choose a seeded employee. The signed cookie
+// ties later requests to that selected employee, but it does not verify a
+// corporate identity. Full delivery replaces this with Microsoft Entra ID.
 export const SESSION_COOKIE = "smart_office_session";
 
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;

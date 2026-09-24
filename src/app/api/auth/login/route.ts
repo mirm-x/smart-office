@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { SESSION_COOKIE, signSession } from "@/server/identity";
 
-// SIMULATED sign-in for the POC (plan section 4, "Identity"): takes a
-// synthetic employee id and establishes a signed server-side session that
-// later routes trust for ownership checks. Not a live identity integration;
-// full delivery replaces this with Microsoft Entra ID.
+// Simulated sign-in for seeded employees. This sets a signed cookie for the
+// demo; it does not verify a corporate identity.
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as { employeeExternalId?: string };
 

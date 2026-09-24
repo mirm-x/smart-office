@@ -19,8 +19,13 @@ export interface CreateBookingInput {
   resourceTypes: ResourceType[]; // ["desk"], ["parking"], or both -- combined request is atomic
 }
 
+export interface AssignedResource {
+  type: ResourceType;
+  label: string;
+}
+
 export type CreateBookingResult =
-  | { ok: true; requestId: string; claimIds: string[] }
+  | { ok: true; requestId: string; claimIds: string[]; resources: AssignedResource[] }
   | {
       ok: false;
       reason:
@@ -40,7 +45,7 @@ const UNIQUE_VIOLATION = "23505";
 // recorded as accepted, keep this false and the API falls back to the
 // original full-day-only flow with no data-model change -- a full-day
 // request already claims both halves, so the fallback needs no rework.
-const HALF_DAY_BOOKING_ENABLED = process.env.HALF_DAY_BOOKING_ENABLED !== "false";
+const HALF_DAY_BOOKING_ENABLED = process.env.HALF_DAY_BOOKING_ENABLED === "true";
 
 /**
  * Creates a booking request and one claim per (resource, half-day period).
@@ -92,6 +97,7 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
     const claimPeriods = claimsForPeriod(input.period);
 
     const claimIds: string[] = [];
+    const resources: AssignedResource[] = [];
     for (const resourceType of input.resourceTypes) {
       const resource = await pickAvailableResource(client, resourceType, input.workDate, claimPeriods);
       if (!resource) {
@@ -111,10 +117,11 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
         );
         claimIds.push(claim.rows[0]!.id);
       }
+      resources.push({ type: resourceType, label: resource.label });
     }
 
     await client.query("commit");
-    return { ok: true, requestId, claimIds };
+    return { ok: true, requestId, claimIds, resources };
   } catch (err: unknown) {
     await client.query("rollback");
     if (isUniqueViolation(err)) {
@@ -139,8 +146,8 @@ async function pickAvailableResource(
   workDate: string,
   claimPeriods: string[]
 ) {
-  const result = await client.query<{ id: string }>(
-    `select r.id
+  const result = await client.query<{ id: string; label: string }>(
+    `select r.id, r.label
        from resources r
       where r.type = $1
         and r.status = 'active'

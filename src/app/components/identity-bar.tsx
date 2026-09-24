@@ -15,10 +15,15 @@ export function IdentityBar() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const result = await signIn(value.trim());
-    setBusy(false);
-    if (!result.ok) {
-      setError(result.error === "unknown_employee" ? "We don't recognise that employee id." : "Sign-in failed.");
+    try {
+      const result = await signIn(value.trim());
+      if (!result.ok) {
+        setError(result.error === "unknown_employee" ? "We don't recognise that employee id." : "Sign-in failed.");
+      }
+    } catch {
+      setError("Sign-in failed. Please try again.");
+    } finally {
+      setBusy(false);
     }
   }
 

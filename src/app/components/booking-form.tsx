@@ -44,12 +44,13 @@ const BOOKING_ERROR: Record<string, string> = {
   half_day_not_enabled: "Half-day booking isn't enabled — choose Full day.",
   checkin_window_closed: "The check-in window for that period has already closed today. Pick a later date or period.",
   invalid_date: "Pick a weekday within the next 14 days.",
+  unauthorized: "Your sign-in has ended. Sign in again before booking.",
 };
 
 interface Confirmation {
   workDate: string;
   period: Period;
-  resources: ("desk" | "parking")[];
+  resources: { type: "desk" | "parking"; label: string }[];
 }
 
 export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
@@ -115,14 +116,14 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          employeeExternalId: identity.employeeExternalId,
           workDate,
           period,
           resourceTypes: RESOURCE_TYPES[resource],
         }),
       });
       if (res.ok) {
-        setConfirmation({ workDate, period, resources: RESOURCE_TYPES[resource] });
+        const data = (await res.json()) as { resources: Confirmation["resources"] };
+        setConfirmation({ workDate, period, resources: data.resources });
         refreshAvailability();
       } else {
         const data = await res.json().catch(() => ({}));
@@ -244,14 +245,14 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
             <dt>Period</dt>
             <dd>{PERIOD_LABEL[confirmation.period]}</dd>
             <dt>Resource</dt>
-            <dd>{confirmation.resources.map((r) => (r === "desk" ? "Desk" : "Parking")).join(" + ")}</dd>
+            <dd>{confirmation.resources.map((r) => r.label).join(" + ")}</dd>
             <dt>Status</dt>
             <dd>
               <span className="badge badge--reserved">◷ Reserved</span>
             </dd>
           </dl>
           <div className="row-between">
-            <span className="muted">See the assigned resource in My bookings.</span>
+            <span className="muted">Manage check-in in My bookings.</span>
             <a className="btn btn--secondary btn--sm" href="/bookings">
               Go to My bookings
             </a>

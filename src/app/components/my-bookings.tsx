@@ -216,13 +216,13 @@ export function MyBookings() {
                     )}
                     {item.status === "released" && (
                       <a className="btn btn--ghost btn--sm" href="/">
-                        Book again
+                        Find another slot
                       </a>
                     )}
                   </div>
                 </div>
                 {item.status === "released" && (
-                  <div className="banner banner--info">Released — this space is free to book again.</div>
+                  <div className="banner banner--info">Released — check availability for the next bookable period.</div>
                 )}
                 {rowError[key] && (
                   <div className="banner banner--error" role="alert">
