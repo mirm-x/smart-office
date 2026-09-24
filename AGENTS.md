@@ -9,6 +9,7 @@ it first. It should always reflect the current agreed rule and the next task
 - `ZRS_Camp_2026_Smart_Office_Reviewed_Plan.md` -- the team's current working plan (booking policy, POC scope, roadmap, presentation outline). Supersedes any earlier "Updated Plan" version.
 - `docs/poc-scope.md` -- the tiered definition of done (must-demonstrate / focused checks / follow-up). Check any new work against this before starting it.
 - `docs/decisions/` -- one file per decision that changes or extends the client specification (e.g. the half-day booking policy). Each record states the rule, why it deviates from spec, and who accepted it.
+- `docs/proposal/` -- client proposal drafts (value, architecture, delivery approach, team, timeline, price), feeding the slide deck. Keep these in sync with the plan and the decision records rather than drifting into their own narrative.
 - `db/migrations/0001_init.sql` -- the current data model and the constraints enforcing booking rules.
 
 If the plan and the code disagree, the plan wins until a human updates one of the two -- say so instead of guessing.

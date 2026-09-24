@@ -6,7 +6,8 @@ rebook**, for morning / afternoon / full-day periods (FR-03, FR-08, FR-09).
 
 See `ZRS_Camp_2026_Smart_Office_Reviewed_Plan.md` for the full story, policy
 table and presentation outline, `docs/poc-scope.md` for what "done" means for
-the camp, and `AGENTS.md` for the Agentic SDLC this repo follows.
+the camp, `docs/proposal/` for the client proposal drafts, and `AGENTS.md`
+for the Agentic SDLC this repo follows.
 
 ## Status
 
@@ -70,5 +71,6 @@ src/lib/db.ts           Shared PostgreSQL pool
 worker/release-worker.ts Automatic no-show release loop
 db/migrations/           Schema + seed data, applied by db/migrate.ts
 docs/decisions/          Decisions that amend the source specification
+docs/proposal/           Client proposal drafts (value, architecture, delivery, team, timeline, price)
 AGENTS.md                 Agent workflow, roles and ground rules for this repo
 ```
