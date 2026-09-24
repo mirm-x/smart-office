@@ -8,6 +8,7 @@ type ResourceChoice = "desk" | "parking" | "both";
 type ResourceType = "desk" | "parking";
 
 interface ResourceAvailability {
+  id: string;
   type: ResourceType;
   label: string;
   free: boolean;
@@ -87,6 +88,7 @@ const RESOURCE_TYPES: Record<ResourceChoice, ResourceType[]> = {
 
 const BOOKING_ERROR: Record<string, string> = {
   no_resource_available: "No resource free for that date and period. Try another slot.",
+  resource_taken: "That space was just taken. Pick another on the map.",
   conflict: "That space was just taken. Please try again.",
   unknown_employee: "We don't recognise that employee id.",
   half_day_not_enabled: "Half-day booking isn't enabled — choose Full day.",
@@ -135,35 +137,46 @@ const PLAN_ZONES: { key: string; label: string; note: string }[] = [
   { key: "workshop", label: "Workshop", note: "Event space" },
 ];
 
-function BookableCluster({ title, type, resources }: { title: string; type: ResourceType; resources: ResourceAvailability[] }) {
-  const items = resources.filter((r) => r.type === type);
-  if (items.length === 0) return null;
-  const free = items.filter((r) => r.free).length;
+// Groups desks into pods by the letter in their label (e.g. "Desk A3" -> pod
+// "A"), so the floor map can lay them out as clustered desk pods.
+function deskPods(desks: ResourceAvailability[]): [string, ResourceAvailability[]][] {
+  const map = new Map<string, ResourceAvailability[]>();
+  for (const d of desks) {
+    const pod = (d.label.match(/Desk\s+([A-Za-z])/)?.[1] ?? "?").toUpperCase();
+    const bucket = map.get(pod) ?? [];
+    bucket.push(d);
+    map.set(pod, bucket);
+  }
+  return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+function SpaceTile({
+  r,
+  selected,
+  onSelect,
+}: {
+  r: ResourceAvailability;
+  selected: boolean;
+  onSelect: (id: string) => void;
+}) {
+  const state = !r.free ? "taken" : selected ? "selected" : "free";
+  const stateLabel = !r.free ? "Taken" : selected ? "Selected" : "Free";
   return (
-    <div className="plan-cluster">
-      <div className="plan-cluster__head">
-        <span className="plan-cluster__title">{title}</span>
-        <span className="plan-cluster__count">
-          {free}/{items.length} free
-        </span>
-      </div>
-      <ul className="plan-tiles" role="list">
-        {items.map((r) => (
-          <li
-            key={r.label}
-            className={`ptile ${r.free ? "ptile--free" : "ptile--taken"}`}
-            aria-label={`${r.label}: ${r.free ? "free" : "taken"}`}
-            title={`${r.label} — ${r.free ? "free" : "taken"}`}
-          >
-            <span className="ptile__glyph">
-              <ResourceGlyph type={type} />
-            </span>
-            <span className="ptile__label">{r.label}</span>
-            <span className="ptile__state">{r.free ? "Free" : "Taken"}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <button
+      type="button"
+      className={`ptile ptile--${state}`}
+      aria-pressed={r.free ? selected : undefined}
+      aria-label={`${r.label}: ${stateLabel.toLowerCase()}`}
+      disabled={!r.free}
+      onClick={() => onSelect(r.id)}
+      title={`${r.label} — ${stateLabel.toLowerCase()}`}
+    >
+      <span className="ptile__glyph">
+        <ResourceGlyph type={r.type} />
+      </span>
+      <span className="ptile__label">{r.label}</span>
+      <span className="ptile__state">{stateLabel}</span>
+    </button>
   );
 }
 
@@ -180,6 +193,10 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [availabilityIssue, setAvailabilityIssue] = useState<{ workDate: string; period: Period; kind: "closed" | "unavailable" } | null>(null);
   const availabilityRequest = useRef<AbortController | null>(null);
+  const [selected, setSelected] = useState<{ desk: string | null; parking: string | null }>({
+    desk: null,
+    parking: null,
+  });
   const [dateError, setDateError] = useState<string | null>(null);
   const [banner, setBanner] = useState<{ tone: "error"; text: string } | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
@@ -239,6 +256,24 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
     };
   }, [refreshAvailability]);
 
+  // Drop a selected space that is no longer free (date/period changed, or
+  // someone else booked it) so we never submit a stale pick.
+  useEffect(() => {
+    if (!availability) {
+      setSelected({ desk: null, parking: null });
+      return;
+    }
+    const freeIds = new Set(availability.resources.filter((r) => r.free).map((r) => r.id));
+    setSelected((s) => ({
+      desk: s.desk && freeIds.has(s.desk) ? s.desk : null,
+      parking: s.parking && freeIds.has(s.parking) ? s.parking : null,
+    }));
+  }, [availability]);
+
+  const selectSpace = useCallback((type: ResourceType, id: string) => {
+    setSelected((s) => ({ ...s, [type]: s[type] === id ? null : id }));
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBanner(null);
@@ -252,6 +287,10 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
 
     setSubmitting(true);
     try {
+      const resourceIds: string[] = [];
+      if ((resource === "desk" || resource === "both") && selected.desk) resourceIds.push(selected.desk);
+      if ((resource === "parking" || resource === "both") && selected.parking) resourceIds.push(selected.parking);
+
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -259,6 +298,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
           workDate,
           period,
           resourceTypes: RESOURCE_TYPES[resource],
+          ...(resourceIds.length > 0 ? { resourceIds } : {}),
         }),
       });
       if (res.ok) {
@@ -271,7 +311,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
         if (reason === "checkin_window_closed") {
           setAvailability(null);
           setAvailabilityIssue({ workDate, period, kind: "closed" });
-        } else if (reason === "conflict" || reason === "no_resource_available") {
+        } else if (reason === "conflict" || reason === "resource_taken" || reason === "no_resource_available") {
           void refreshAvailability();
         }
         if (reason === "invalid_date") {
@@ -292,6 +332,23 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
   const visibleAvailability = availability?.workDate === workDate && availability.period === period ? availability : null;
   const visibleIssue = availabilityIssue?.workDate === workDate && availabilityIssue.period === period ? availabilityIssue.kind : null;
 
+  const desks = visibleAvailability?.resources.filter((r) => r.type === "desk") ?? [];
+  const parking = visibleAvailability?.resources.filter((r) => r.type === "parking") ?? [];
+  const pods = deskPods(desks);
+  const deskFree = desks.filter((r) => r.free).length;
+  const parkingFree = parking.filter((r) => r.free).length;
+
+  const labelById = (id: string | null) =>
+    id ? visibleAvailability?.resources.find((r) => r.id === id)?.label ?? null : null;
+  const picks: string[] = [];
+  if ((resource === "desk" || resource === "both") && labelById(selected.desk)) picks.push(labelById(selected.desk)!);
+  if ((resource === "parking" || resource === "both") && labelById(selected.parking))
+    picks.push(labelById(selected.parking)!);
+  const bookHelp =
+    picks.length > 0
+      ? `Booking ${picks.join(" + ")}.`
+      : "Pick a space on the map, or leave it and one is assigned automatically.";
+
   return (
     <>
       <h1 className="screen-title">Book a space</h1>
@@ -305,7 +362,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
       {/* Punchy availability overview -- big, confident numbers first. */}
       <section className="avail" aria-live="polite" aria-label="Availability">
         <div className="row-between">
-          <span className="muted">Booking availability · checks every minute while open</span>
+          <span className="muted">Booking availability · checks every minute while this tab is active</span>
           <button type="button" className="btn btn--ghost btn--sm" onClick={() => void refreshAvailability()}>
             ↻ Refresh
           </button>
@@ -358,6 +415,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
               setWorkDate(e.target.value);
               setAvailability(null);
               setAvailabilityIssue(null);
+              setSelected({ desk: null, parking: null });
             }}
             aria-invalid={dateError ? true : undefined}
             aria-describedby="date-help"
@@ -383,6 +441,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
                     setPeriod(p);
                     setAvailability(null);
                     setAvailabilityIssue(null);
+                    setSelected({ desk: null, parking: null });
                   }}
                 >
                   <span className="period-option__label">{m.label}</span>
@@ -413,12 +472,11 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
           </div>
         </fieldset>
 
-        {/* Floor map -- illustrative office layout with booking availability.
-            Coloured zones are amenities and are NOT bookable. */}
+        {/* Illustrative layout; selectable desks and parking show booking availability. */}
         {visibleAvailability && visibleAvailability.resources.length > 0 && (
           <div className="field" role="group" aria-label="Floor map">
             <div className="row-between">
-              <span className="field__label">Floor map</span>
+              <span className="field__label">Floor map — tap a space to pick it</span>
               <span className="tag-simulated">Illustrative layout · booking availability</span>
             </div>
             <div className="floorplan">
@@ -431,18 +489,62 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
                   </div>
                 ))}
               </div>
-              <div className="floorplan__bookable">
+              <div className="floorplan__room">
                 {(resource === "desk" || resource === "both") && (
-                  <BookableCluster title="Desks" type="desk" resources={visibleAvailability.resources} />
+                  <div className="room-area">
+                    <div className="room-area__head">
+                      <span className="room-area__title">Desks</span>
+                      <span className="room-area__count">
+                        {deskFree}/{desks.length} free
+                      </span>
+                    </div>
+                    <div className="pods">
+                      {pods.map(([pod, items]) => (
+                        <div className="pod" key={pod}>
+                          <span className="pod__label">Pod {pod}</span>
+                          <div className="pod__grid">
+                            {items.map((r) => (
+                              <SpaceTile
+                                key={r.id}
+                                r={r}
+                                selected={selected.desk === r.id}
+                                onSelect={(id) => selectSpace("desk", id)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
                 {(resource === "parking" || resource === "both") && (
-                  <BookableCluster title="Parking" type="parking" resources={visibleAvailability.resources} />
+                  <div className="room-area">
+                    <div className="room-area__head">
+                      <span className="room-area__title">Parking</span>
+                      <span className="room-area__count">
+                        {parkingFree}/{parking.length} free
+                      </span>
+                    </div>
+                    <div className="parking-row">
+                      {parking.map((r) => (
+                        <SpaceTile
+                          key={r.id}
+                          r={r}
+                          selected={selected.parking === r.id}
+                          onSelect={(id) => selectSpace("parking", id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
             <div className="plan-legend" aria-hidden="true">
               <span className="plan-legend__item">
                 <span className="plan-legend__swatch plan-legend__swatch--free" /> Free
+              </span>
+              <span className="plan-legend__item">
+                <span className="plan-legend__swatch plan-legend__swatch--selected" /> Selected
               </span>
               <span className="plan-legend__item">
                 <span className="plan-legend__swatch plan-legend__swatch--taken" /> Taken
@@ -462,7 +564,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
 
         <div className="row-between">
           <span className="muted" id="book-help">
-            A free resource is assigned automatically on booking.
+            {bookHelp}
           </span>
           <button type="submit" className="btn btn--primary" disabled={!identity || submitting || visibleIssue === "closed"}>
             {submitting ? "Booking…" : "Book"}

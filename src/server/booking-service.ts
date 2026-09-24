@@ -17,6 +17,12 @@ export interface CreateBookingInput {
   workDate: string; // YYYY-MM-DD, office-local
   period: Period;
   resourceTypes: ResourceType[]; // ["desk"], ["parking"], or both -- combined request is atomic
+  // Optional specific resources to book (one id per requested type), chosen from
+  // the floor map. When omitted for a type, a free resource of that type is
+  // auto-assigned (the original behaviour). A specifically requested resource
+  // that is no longer free yields `resource_taken` rather than a silent
+  // reassignment.
+  resourceIds?: string[];
 }
 
 export interface AssignedResource {
@@ -31,6 +37,7 @@ export type CreateBookingResult =
       reason:
         | "invalid_date"
         | "no_resource_available"
+        | "resource_taken"
         | "conflict"
         | "unknown_employee"
         | "half_day_not_enabled"
@@ -96,13 +103,37 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
 
     const claimPeriods = claimsForPeriod(input.period);
 
+    // Resolve each selected space to one active resource of the requested type.
+    // A stale or invalid selection must not silently turn into auto-assignment.
+    const targetIdByType = new Map<ResourceType, string>();
+    if (input.resourceIds && input.resourceIds.length > 0) {
+      const requested = await client.query<{ id: string; type: ResourceType }>(
+        "select id, type from resources where id = any($1::uuid[]) and status = 'active'",
+        [input.resourceIds]
+      );
+      for (const row of requested.rows) {
+        if (!input.resourceTypes.includes(row.type) || targetIdByType.has(row.type)) {
+          await client.query("rollback");
+          return { ok: false, reason: "resource_taken" };
+        }
+        targetIdByType.set(row.type, row.id);
+      }
+      if (targetIdByType.size !== input.resourceIds.length) {
+        await client.query("rollback");
+        return { ok: false, reason: "resource_taken" };
+      }
+    }
+
     const claimIds: string[] = [];
     const resources: AssignedResource[] = [];
     for (const resourceType of input.resourceTypes) {
-      const resource = await pickAvailableResource(client, resourceType, input.workDate, claimPeriods);
+      const targetId = targetIdByType.get(resourceType) ?? null;
+      const resource = await pickAvailableResource(client, resourceType, input.workDate, claimPeriods, targetId);
       if (!resource) {
         await client.query("rollback");
-        return { ok: false, reason: "no_resource_available" };
+        // A specific pick that is gone reads differently from "the office is
+        // full" -- the UI tells the user their chosen space was just taken.
+        return { ok: false, reason: targetId ? "resource_taken" : "no_resource_available" };
       }
 
       for (const claimPeriod of claimPeriods) {
@@ -133,8 +164,12 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
   }
 }
 
-// POC resource picker: first active resource of the requested type that has
-// no active claim for any of the requested half-day periods on this date.
+// POC resource picker: an active resource of the requested type with no active
+// claim for any of the requested half-day periods on this date. When
+// `targetId` is given (the employee picked a specific space on the floor map)
+// the candidate is constrained to that resource, so a taken pick returns no row
+// (surfaced as `resource_taken`) instead of silently reassigning. Otherwise the
+// first free resource by label is auto-assigned.
 // `for update skip locked` serializes concurrent requests against the same
 // candidate rows; the unique partial indexes on booking_claims are the final
 // safety net for the remaining race window (acceptance criterion: booking #3).
@@ -144,13 +179,15 @@ async function pickAvailableResource(
   client: PoolClient,
   resourceType: ResourceType,
   workDate: string,
-  claimPeriods: string[]
+  claimPeriods: string[],
+  targetId: string | null = null
 ) {
   const result = await client.query<{ id: string; label: string }>(
     `select r.id, r.label
        from resources r
       where r.type = $1
         and r.status = 'active'
+        and ($4::uuid is null or r.id = $4::uuid)
         and not exists (
           select 1
             from booking_claims bc
@@ -162,7 +199,7 @@ async function pickAvailableResource(
       order by r.label
       for update of r skip locked
       limit 1`,
-    [resourceType, workDate, claimPeriods]
+    [resourceType, workDate, claimPeriods, targetId]
   );
   return result.rows[0] ?? null;
 }
