@@ -97,6 +97,7 @@ export async function listEmployeeBookings(employeeExternalId: string): Promise<
 }
 
 export interface ResourceAvailability {
+  id: string;
   type: ResourceType;
   label: string;
   free: boolean;
@@ -122,8 +123,9 @@ export async function getAvailability(workDate: string, period: Period): Promise
     return null;
   }
   const claimPeriods = claimsForPeriod(period);
-  const res = await db.query<{ type: ResourceType; label: string; free: boolean }>(
-    `select r.type,
+  const res = await db.query<{ id: string; type: ResourceType; label: string; free: boolean }>(
+    `select r.id,
+            r.type,
             r.label,
             not exists (
               select 1 from booking_claims bc
@@ -139,6 +141,7 @@ export async function getAvailability(workDate: string, period: Period): Promise
   );
 
   const resources: ResourceAvailability[] = res.rows.map((row) => ({
+    id: row.id,
     type: row.type,
     label: row.label,
     free: row.free,
