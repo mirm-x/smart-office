@@ -12,17 +12,24 @@ before treating any figure here as final.
 
 ## Value
 
-### A booking doesn’t always mean the space is actually being used. That’s the gap we want to close.
+### **A smarter way to use the space you already have.**
+We’re solving three things that matter in a Smart Office:
 
-With our solution, employees can quickly book a desk or parking spot through a conversational assistant. They check in when they arrive, and if they don’t show up, the space is automatically released for someone else.
+**Easy to book.**
+Employees simply ask for the desk or parking they need through a conversational assistant—no searching through complex booking grids.
 
-That gives employees a better booking experience while helping the company **get more out of the space it already has**.
+**Use space more efficiently.**
+A booking is only valuable if the space is actually used. Check-in and real-time occupancy sensing make unused spaces visible and automatically release them, so someone else can use them.
 
-And this isn’t just a concept. In the POC, we show the whole journey working end to end:
+**Build it smarter with Agentic SDLC.**
+Our POC is not just a demo—it shows how an Agentic SDLC can accelerate delivery while keeping the right engineering discipline, context and quality throughout the process. The same approach can take the solution from a two-day POC to a scalable Smart Office platform across offices and thousands of employees.
+
+### **The result**
+**Less friction for employees. Better utilisation for the company. A delivery approach built to scale.**
+
+And we prove it end to end:
 
 **Book → Check in → Use → Release → Rebook**
-
-The same approach is built with an **Agentic SDLC**, giving us a structured way to move from a working two-day POC toward a solution that can scale across offices and thousands of employees.
 
 ## Complete specification coverage
 
