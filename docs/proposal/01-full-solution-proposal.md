@@ -50,6 +50,47 @@ phase, not part of this bid or its price below (see the decision record
 rather than replacing it, scoped to the pilot site and the three
 value-carrying features:
 
+```mermaid
+flowchart TB
+    subgraph Surfaces["Booking surfaces -- Feature 2"]
+        MapUI["Map UI<br/>site floor &amp; parking map"]
+        Chat["Teams / Slack<br/>natural-language request"]
+    end
+
+    AI["Approved AI service<br/>NLU routing"]
+    Entra["Microsoft Entra ID<br/>sign-in"]
+
+    subgraph App["Next.js application -- this bid"]
+        API["Booking API<br/>/api/bookings, /checkin"]
+        Core["Booking core<br/>booking-policy.ts / booking-service.ts<br/>conflict-safe, atomic desk+parking"]
+        Worker["Release worker<br/>auto-release no-shows -- Feature 1"]
+    end
+
+    DB[("PostgreSQL<br/>booking_requests, booking_claims, audit_log")]
+
+    subgraph HW["Sensors &amp; LEDs -- Feature 1"]
+        Gateway["Device / gateway layer"]
+        Sensors["Desk &amp; parking sensors, LED indicators"]
+    end
+
+    MapUI --> API
+    Chat --> AI --> API
+    Entra -.->|sign-in / ownership check| API
+    API --> Core
+    Core <--> DB
+    Worker <--> DB
+    Sensors --> Gateway --> DB
+    DB -.->|occupancy signal only -- never cancels a booking| Worker
+```
+
+**Reading the diagram:** both booking surfaces converge on the same API and
+booking core -- one set of conflict-safety guarantees regardless of channel.
+Entra gates every write (dotted). The release worker releases on the
+check-in deadline alone; the dotted line shows it separately reading the
+sensor signal from the database afterward, only to flag a mismatch for
+review. The signal never drives or blocks the release itself, matching the
+"a sensor never cancels a booking by itself" rule below.
+
 - **Booking core** (proven in the POC): resources modelled as morning/afternoon
   claims, with database constraints -- not just application code -- enforcing
   that no resource or employee holds two active overlapping claims, regardless
