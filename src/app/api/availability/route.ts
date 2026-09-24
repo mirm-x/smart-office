@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getAvailability } from "@/server/booking-queries";
 import { Period, canCheckInSameDay } from "@/server/booking-policy";
+import { SESSION_COOKIE, verifySession } from "@/server/identity";
 
 const PERIODS: Period[] = ["morning", "afternoon", "full_day"];
 
 // Read-only availability hint for the Book screen (free desk/parking counts for
-// a date + period). Authoritative allocation still happens on booking.
+// a date + period). Authoritative allocation still happens on booking. When the
+// caller is signed in, spaces they already hold are flagged (`mine`) so the map
+// can distinguish them from spaces taken by others.
 export async function GET(req: NextRequest) {
   const workDate = req.nextUrl.searchParams.get("workDate");
   const period = req.nextUrl.searchParams.get("period") as Period | null;
@@ -14,7 +18,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "missing_or_invalid_params" }, { status: 400 });
   }
 
-  const result = await getAvailability(workDate, period);
+  const session = verifySession(cookies().get(SESSION_COOKIE)?.value);
+  const result = await getAvailability(workDate, period, session?.employeeExternalId);
   if (!result) {
     return NextResponse.json({ error: "invalid_date" }, { status: 422 });
   }

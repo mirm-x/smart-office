@@ -67,6 +67,35 @@ function formatDate(iso: string): string {
   });
 }
 
+interface BookingGroup {
+  requestId: string;
+  workDate: string;
+  period: Period;
+  items: BookingItem[];
+}
+
+// Groups an employee's booking rows by request, so a desk + parking booked
+// together show as one card. Order is preserved (server sorts by date desc);
+// resources within a group are ordered desk then parking. Each resource keeps
+// its own status and cancel/check-in controls -- grouping is display only.
+function groupByRequest(items: BookingItem[]): BookingGroup[] {
+  const order: string[] = [];
+  const groups = new Map<string, BookingGroup>();
+  for (const item of items) {
+    let group = groups.get(item.requestId);
+    if (!group) {
+      group = { requestId: item.requestId, workDate: item.workDate, period: item.period, items: [] };
+      groups.set(item.requestId, group);
+      order.push(item.requestId);
+    }
+    group.items.push(item);
+  }
+  for (const group of groups.values()) {
+    group.items.sort((a, b) => (a.resourceType === b.resourceType ? 0 : a.resourceType === "desk" ? -1 : 1));
+  }
+  return order.map((id) => groups.get(id)!);
+}
+
 function Countdown({ item, now }: { item: BookingItem; now: number }) {
   const opens = new Date(item.checkinWindowOpensAt).getTime();
   const deadline = new Date(item.checkinDeadlineAt).getTime();
@@ -268,85 +297,95 @@ export function MyBookings() {
 
       {bookings && bookings.length > 0 && (
         <ul className="booking-list">
-          {bookings.map((item) => {
-            const key = `${item.requestId}:${item.resourceType}`;
-            const badge = STATUS_BADGE[item.status];
-            const opens = new Date(item.checkinWindowOpensAt).getTime();
-            const deadline = new Date(item.checkinDeadlineAt).getTime();
-            const withinWindow = now >= opens && now < deadline;
-            return (
-              <li key={key} className="card">
-                <div className="booking-row">
-                  <div className="booking-row__meta">
-                    <span className="booking-row__resource">
-                      {item.resourceType === "desk" ? "🖥" : "🅿"} {item.resourceLabel}
-                    </span>
-                    <span className="booking-row__sub">
-                      {formatDate(item.workDate)} · {PERIOD_LABEL[item.period]}
-                    </span>
-                    {item.status === "reserved" && <Countdown item={item} now={now} />}
-                    {item.status === "checked_in" && (
-                      <span style={{ color: "var(--status-checkedin-text)", fontSize: 13 }}>
-                        Protected for this period.
-                      </span>
-                    )}
-                  </div>
-                  <div className="booking-row__actions">
-                    <span className={`badge ${badge.className}`}>
-                      {badge.icon} {badge.label}
-                    </span>
-                    {item.status === "reserved" && now < deadline && (
-                      <button
-                        type="button"
-                        className="btn btn--primary btn--sm"
-                        disabled={!withinWindow || busyKeys.has(key)}
-                        onClick={() => checkIn(item)}
-                      >
-                        {busyKeys.has(key) ? "Working…" : "Check in"}
-                      </button>
-                    )}
-                    {item.status === "reserved" && (
-                      <button
-                        type="button"
-                        className="btn btn--ghost btn--sm"
-                        disabled={busyKeys.has(key)}
-                        onClick={() => setConfirmingKey(confirmingKey === key ? null : key)}
-                      >
-                        Cancel booking
-                      </button>
-                    )}
-                    {item.status === "released" && (
-                      <Link className="btn btn--ghost btn--sm" href="/">
-                        Find another slot
-                      </Link>
-                    )}
-                  </div>
-                </div>
-                {item.status === "reserved" && confirmingKey === key && (
-                  <div className="booking-cancel" role="group" aria-label={`Cancel ${item.resourceLabel}`}>
-                    <p>Cancel {item.resourceLabel} on {formatDate(item.workDate)} ({PERIOD_LABEL[item.period]})? Your reservation will be removed.</p>
-                    <div className="booking-cancel__actions">
-                      <button type="button" className="btn btn--secondary btn--sm" onClick={() => setConfirmingKey(null)} disabled={busyKeys.has(key)}>
-                        Keep booking
-                      </button>
-                      <button type="button" className="btn btn--danger btn--sm" onClick={() => cancel(item)} disabled={busyKeys.has(key)}>
-                        {busyKeys.has(key) ? "Cancelling…" : "Confirm cancellation"}
-                      </button>
-                    </div>
-                  </div>
+          {groupByRequest(bookings).map((group) => (
+            <li key={group.requestId} className="card booking-group">
+              <div className="booking-group__head">
+                <span className="booking-group__date">{formatDate(group.workDate)}</span>
+                <span className="booking-group__period">{PERIOD_LABEL[group.period]}</span>
+                {group.items.length > 1 && (
+                  <span className="booking-group__combo">Desk + parking · cancel each separately</span>
                 )}
-                {item.status === "released" && (
-                  <div className="banner banner--info">Released — check availability for the next bookable period.</div>
-                )}
-                {item.status === "cancelled" && <span className="muted">This booking no longer holds the space.</span>}
-                {rowError[key] && (
-                  <div className="banner banner--error" role="alert">
-                    ⚠ {rowError[key]}
-                  </div>
-                )}
-              </li>
-            );
-          })}
+              </div>
+              <ul className="booking-group__items">
+                {group.items.map((item) => {
+                  const key = `${item.requestId}:${item.resourceType}`;
+                  const badge = STATUS_BADGE[item.status];
+                  const opens = new Date(item.checkinWindowOpensAt).getTime();
+                  const deadline = new Date(item.checkinDeadlineAt).getTime();
+                  const withinWindow = now >= opens && now < deadline;
+                  return (
+                    <li key={key} className="booking-item">
+                      <div className="booking-row">
+                        <div className="booking-row__meta">
+                          <span className="booking-row__resource">
+                            {item.resourceType === "desk" ? "🖥" : "🅿"} {item.resourceLabel}
+                          </span>
+                          {item.status === "reserved" && <Countdown item={item} now={now} />}
+                          {item.status === "checked_in" && (
+                            <span style={{ color: "var(--status-checkedin-text)", fontSize: 13 }}>
+                              Protected for this period.
+                            </span>
+                          )}
+                        </div>
+                        <div className="booking-row__actions">
+                          <span className={`badge ${badge.className}`}>
+                            {badge.icon} {badge.label}
+                          </span>
+                          {item.status === "reserved" && now < deadline && (
+                            <button
+                              type="button"
+                              className="btn btn--primary btn--sm"
+                              disabled={!withinWindow || busyKeys.has(key)}
+                              onClick={() => checkIn(item)}
+                            >
+                              {busyKeys.has(key) ? "Working…" : "Check in"}
+                            </button>
+                          )}
+                          {item.status === "reserved" && (
+                            <button
+                              type="button"
+                              className="btn btn--ghost btn--sm"
+                              disabled={busyKeys.has(key)}
+                              onClick={() => setConfirmingKey(confirmingKey === key ? null : key)}
+                            >
+                              Cancel {item.resourceType}
+                            </button>
+                          )}
+                          {item.status === "released" && (
+                            <Link className="btn btn--ghost btn--sm" href="/">
+                              Find another slot
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                      {item.status === "reserved" && confirmingKey === key && (
+                        <div className="booking-cancel" role="group" aria-label={`Cancel ${item.resourceLabel}`}>
+                          <p>Cancel {item.resourceLabel} on {formatDate(item.workDate)} ({PERIOD_LABEL[item.period]})? Your reservation will be removed.</p>
+                          <div className="booking-cancel__actions">
+                            <button type="button" className="btn btn--secondary btn--sm" onClick={() => setConfirmingKey(null)} disabled={busyKeys.has(key)}>
+                              Keep booking
+                            </button>
+                            <button type="button" className="btn btn--danger btn--sm" onClick={() => cancel(item)} disabled={busyKeys.has(key)}>
+                              {busyKeys.has(key) ? "Cancelling…" : "Confirm cancellation"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      {item.status === "released" && (
+                        <div className="banner banner--info">Released — check availability for the next bookable period.</div>
+                      )}
+                      {item.status === "cancelled" && <span className="muted">This booking no longer holds the space.</span>}
+                      {rowError[key] && (
+                        <div className="banner banner--error" role="alert">
+                          ⚠ {rowError[key]}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </li>
+          ))}
         </ul>
       )}
     </>

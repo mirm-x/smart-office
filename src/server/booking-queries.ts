@@ -101,6 +101,7 @@ export interface ResourceAvailability {
   type: ResourceType;
   label: string;
   free: boolean;
+  mine: boolean;
 }
 
 export interface AvailabilityResult {
@@ -114,16 +115,23 @@ export interface AvailabilityResult {
 /**
  * Per-resource free/taken status for a date + period, plus free counts by type.
  * A resource is free when it has no reserved/checked-in claim for any half-day
- * period the requested `period` occupies. Backs the Book screen availability
- * hero and floor map; authoritative allocation still happens in
- * booking-service.createBooking. Returns null for a non-bookable date.
+ * period the requested `period` occupies. When `employeeExternalId` is given,
+ * `mine` marks the resources that same employee already holds for the slot, so
+ * the floor map can colour them distinctly from spaces taken by others. Backs
+ * the Book screen availability hero and floor map; authoritative allocation
+ * still happens in booking-service.createBooking. Returns null for a
+ * non-bookable date.
  */
-export async function getAvailability(workDate: string, period: Period): Promise<AvailabilityResult | null> {
+export async function getAvailability(
+  workDate: string,
+  period: Period,
+  employeeExternalId?: string
+): Promise<AvailabilityResult | null> {
   if (!isWorkingDate(workDate) || !isWithinBookingHorizon(workDate)) {
     return null;
   }
   const claimPeriods = claimsForPeriod(period);
-  const res = await db.query<{ id: string; type: ResourceType; label: string; free: boolean }>(
+  const res = await db.query<{ id: string; type: ResourceType; label: string; free: boolean; mine: boolean }>(
     `select r.id,
             r.type,
             r.label,
@@ -133,11 +141,21 @@ export async function getAvailability(workDate: string, period: Period): Promise
                  and bc.work_date = $1
                  and bc.period = any($2::text[])
                  and bc.status in ('reserved', 'checked_in')
-            ) as free
+            ) as free,
+            exists (
+              select 1 from booking_claims bc
+               join employees e on e.id = bc.employee_id
+               where bc.resource_id = r.id
+                 and bc.work_date = $1
+                 and bc.period = any($2::text[])
+                 and bc.status in ('reserved', 'checked_in')
+                 and $3::text is not null
+                 and e.external_id = $3::text
+            ) as mine
        from resources r
       where r.status = 'active'
       order by r.type, r.label`,
-    [workDate, claimPeriods]
+    [workDate, claimPeriods, employeeExternalId ?? null]
   );
 
   const resources: ResourceAvailability[] = res.rows.map((row) => ({
@@ -145,6 +163,7 @@ export async function getAvailability(workDate: string, period: Period): Promise
     type: row.type,
     label: row.label,
     free: row.free,
+    mine: row.mine,
   }));
   const desk = resources.filter((r) => r.type === "desk" && r.free).length;
   const parking = resources.filter((r) => r.type === "parking" && r.free).length;

@@ -13,6 +13,7 @@ interface ResourceAvailability {
   type: ResourceType;
   label: string;
   free: boolean;
+  mine: boolean;
 }
 
 interface Availability {
@@ -151,8 +152,8 @@ function SpaceTile({
   selected: boolean;
   onSelect: (id: string) => void;
 }) {
-  const state = !r.free ? "taken" : selected ? "selected" : "free";
-  const stateLabel = !r.free ? "Taken" : selected ? "Selected" : "Free";
+  const state = r.mine ? "mine" : !r.free ? "taken" : selected ? "selected" : "free";
+  const stateLabel = r.mine ? "Yours" : !r.free ? "Taken" : selected ? "Selected" : "Free";
   return (
     <button
       type="button"
@@ -230,7 +231,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
       setAvailability(null);
       setAvailabilityIssue({ workDate, period, kind: "unavailable" });
     }
-  }, [workDate, period, isWeekend]);
+  }, [workDate, period, isWeekend, identity?.employeeExternalId]);
 
   useEffect(() => {
     void refreshAvailability();
@@ -528,6 +529,9 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
               </span>
               <span className="plan-legend__item">
                 <span className="plan-legend__swatch plan-legend__swatch--selected" /> Selected
+              </span>
+              <span className="plan-legend__item">
+                <span className="plan-legend__swatch plan-legend__swatch--mine" /> Yours
               </span>
               <span className="plan-legend__item">
                 <span className="plan-legend__swatch plan-legend__swatch--taken" /> Taken
