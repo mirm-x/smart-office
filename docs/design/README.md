@@ -25,4 +25,4 @@ FR-09). Full rationale and redlines: [`tier1-ui-spec.md`](./tier1-ui-spec.md).
   the reliable import path.
 - Emoji/glyph icons in the SVG are placeholders — swap for a proper icon set
   (e.g. Lucide/Feather) on rebuild.
-- Everything simulated (the sign-in stub) is labelled, per repo ground rules.
+- Everything simulated (the sign-in stub) is labelled, per repo ground rules

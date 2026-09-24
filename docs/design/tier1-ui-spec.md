@@ -134,7 +134,6 @@ Component padding and screen gaps below reference these tokens.
 | `radius/sm` | 6px | Inputs, badges |
 | `radius/md` | 10px | Buttons, cards |
 | `radius/lg` | 14px | Modals/large cards |
-| `radius/pill` | 999px | StatusBadge, chips |
 | `elevation/1` | `0 1px 2px rgba(16,24,40,.06)` | Cards, bars |
 | `elevation/2` | `0 4px 12px rgba(16,24,40,.10)` | Menus, confirmation |
 
@@ -163,7 +162,7 @@ target size 44×44px.
 Persistent top bar; the "signed in as" identity drives every API call.
 
 - **Anatomy:** left app title `Smart Office` (`text/h3`) · right group: label
-  `Signed in as`, text input (`Field`, compact), and a **simulated pill**
+  `Signed in as`, text input (`Field`, compact), and a **simulated tag**
   reading `Simulated sign-in — no real SSO` (`color/status/simulated`, info
   icon).
 - **Layout:** horizontal auto-layout, space-between, height 56, padding
@@ -244,7 +243,7 @@ Pill communicating claim status with **icon + text + colour**.
 | released | `Released` | rotate/undo | `color/status/released` |
 | cancelled | `Cancelled` | slash-circle | `color/status/cancelled` |
 
-- **Redlines:** radius `radius/pill`, padding `4/10`, icon 14px, gap `space/1`,
+- **Redlines:** radius `radius/sm`, padding `4/10`, icon 14px, gap `space/1`,
   text `text/label`.
 
 ## 2.8 Countdown
@@ -398,7 +397,7 @@ Generic network/500 → `Something went wrong. Please try again.`
 
 ## 4.4 Simulated-element labelling (ground rule)
 
-- IdentityBar carries the persistent `Simulated sign-in — no real SSO` pill.
+- IdentityBar carries the persistent `Simulated sign-in — no real SSO` tag.
 - Any demo-shortened deadline (via `DEMO_RELEASE_DEADLINE_MINUTES`) shown on My
   bookings must read e.g. `Demo deadline (shortened)` in warning tone — never
   presented as the production policy time.

@@ -71,6 +71,7 @@ src/lib/db.ts           Shared PostgreSQL pool
 worker/release-worker.ts Automatic no-show release loop
 db/migrations/           Schema + seed data, applied by db/migrate.ts
 docs/decisions/          Decisions that amend the source specification
+docs/design/             UI/UX design spec (Figma-ready) for the tier-1 journey
 docs/proposal/           Client proposal drafts (value, architecture, delivery, team, timeline, price)
 AGENTS.md                 Agent workflow, roles and ground rules for this repo
 ```
