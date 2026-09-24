@@ -8,13 +8,27 @@ each section maps 1:1 to a Figma concept — rebuild it in Figma by turning
 Foundations into styles, Components into component sets with variants, and
 Screens into frames.
 
-> This document is the **design source of truth** until the code build lands.
-> After human design approval (per `AGENTS.md` workflow), the frontend build
-> reuses these exact tokens and components.
+> This document records the original design handoff. The implemented visual
+> refinements below supersede its earlier component redlines where they differ.
 
 > **Importable Figma assets** (see `docs/design/README.md`):
 > `tier1-ui-mockups.svg` (drag onto the Figma canvas → editable frames) and
 > `tier1-ui-tokens.json` (import with the Tokens Studio for Figma plugin).
+
+## Implemented visual refinement (September 2026)
+
+The running POC keeps this specification's light palette, system font, 760px
+content column, explicit status labels, and simulated-integration labelling.
+The current UI adds a blue **booking availability** panel, a two-step booking
+form, a selectable illustrative floor map (see
+[`0002-specific-resource-selection.md`](../decisions/0002-specific-resource-selection.md)),
+and request-grouped booking cards. The map shows booking availability; it does
+not claim to show live sensor occupancy.
+
+For the implemented screens, `src/app/globals.css` is the reference for the
+refined spacing, shadows, 18px card corners, period-card layout, and mobile
+breakpoints. The SVG mockups and JSON tokens below remain the original design
+handoff and have not been regenerated to depict this refinement.
 
 ## Traceability
 
@@ -29,14 +43,14 @@ Screens into frames.
 
 ## Scope
 
-**In scope (tier 1 only):** two screens — *Book a space* and *My bookings* —
-plus a labelled simulated sign-in stub, and the components/foundations they
-need.
+**In scope:** two screens — *Book a space* and *My bookings* — plus a labelled
+simulated sign-in stub, the illustrative resource picker accepted in decision
+0002, and the components/foundations they need.
 
 **Out of scope (do not design here):** guided-chat conversational assistant,
-sensor/LED occupancy panel, seat-map/resource picker (booking auto-assigns),
-admin console, notifications, and "Book and check in now" (gated on the pending
-facilitator decision — see `docs/decisions/0001-half-day-booking-policy.md`).
+sensor/LED occupancy panel, admin console, notifications, and "Book and check
+in now" (gated on the pending facilitator decision — see
+`docs/decisions/0001-half-day-booking-policy.md`).
 
 **Policy gates that shape the UI:**
 

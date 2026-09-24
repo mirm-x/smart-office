@@ -100,21 +100,43 @@ function Countdown({ item, now }: { item: BookingItem; now: number }) {
   const opens = new Date(item.checkinWindowOpensAt).getTime();
   const deadline = new Date(item.checkinDeadlineAt).getTime();
 
-  if (now < opens) {
-    return <span className="muted">◷ Check-in opens {timeInOffice(item.checkinWindowOpensAt)}</span>;
+  const phase = now < opens ? "not-open" : now >= deadline ? "closed" : "open";
+  const prevPhase = useRef(phase);
+  const [announcement, setAnnouncement] = useState("");
+
+  useEffect(() => {
+    if (phase !== prevPhase.current) {
+      prevPhase.current = phase;
+      if (phase === "open") {
+        setAnnouncement(`Check-in window is now open. Check in before ${timeInOffice(item.checkinDeadlineAt)}.`);
+      } else if (phase === "closed") {
+        setAnnouncement("Check-in window has closed.");
+      }
+    }
+  }, [phase, item.checkinDeadlineAt]);
+
+  const liveRegion = (
+    <span className="visually-hidden" aria-live="polite">{announcement}</span>
+  );
+
+  if (phase === "not-open") {
+    return <><span className="muted">◷ Check-in opens {timeInOffice(item.checkinWindowOpensAt)}</span>{liveRegion}</>;
   }
-  if (now >= deadline) {
-    return <span style={{ color: "var(--status-released-text)", fontSize: 13 }}>◷ Window closed</span>;
+  if (phase === "closed") {
+    return <><span style={{ color: "var(--status-released-text)", fontSize: 13 }}>◷ Window closed</span>{liveRegion}</>;
   }
   const msLeft = deadline - now;
   const mins = Math.floor(msLeft / 60000);
   const secs = Math.floor((msLeft % 60000) / 1000);
   const warn = msLeft < 5 * 60000;
   return (
-    <span style={{ color: warn ? "var(--status-warning-text)" : "var(--text-secondary)", fontSize: 13 }}>
-      ◷ Check in before {timeInOffice(item.checkinDeadlineAt)} ·{" "}
-      {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")} left
-    </span>
+    <>
+      <span aria-live="off" style={{ color: warn ? "var(--status-warning-text)" : "var(--text-secondary)", fontSize: 13 }}>
+        ◷ Check in before {timeInOffice(item.checkinDeadlineAt)} ·{" "}
+        {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")} left
+      </span>
+      {liveRegion}
+    </>
   );
 }
 
@@ -208,7 +230,10 @@ export function MyBookings() {
         setLiveMsg(`Checked in ${item.resourceLabel}.`);
       } else {
         const data = await res.json().catch(() => ({}));
-        setRowError((e) => ({ ...e, [key]: CHECKIN_ERROR[data.error] ?? "Check-in failed." }));
+        const msg = data.error === "too_early"
+          ? `Check-in isn't open yet — it opens at ${timeInOffice(item.checkinWindowOpensAt)}.`
+          : CHECKIN_ERROR[data.error] ?? "Check-in failed.";
+        setRowError((e) => ({ ...e, [key]: msg }));
         if (res.status === 409) await refresh();
       }
     } catch {
@@ -261,7 +286,11 @@ export function MyBookings() {
   if (!identity) {
     return (
       <>
-        <h1 className="screen-title">My bookings</h1>
+        <div className="page-intro">
+          <span className="eyebrow">Your reservations</span>
+          <h1 className="screen-title">My bookings</h1>
+          <p>See what is reserved, check in on time, and free up space when plans change.</p>
+        </div>
         <div className="banner banner--info" role="status">
           ⓘ Enter an employee id above to see your bookings.
         </div>
@@ -271,8 +300,12 @@ export function MyBookings() {
 
   return (
     <>
-      <div className="row-between">
-        <h1 className="screen-title">My bookings</h1>
+      <div className="page-intro page-intro--with-action">
+        <div>
+          <span className="eyebrow">Your reservations</span>
+          <h1 className="screen-title">My bookings</h1>
+          <p>See what is reserved, check in on time, and free up space when plans change.</p>
+        </div>
         <button type="button" className="btn btn--secondary btn--sm" onClick={refresh} disabled={fetching}>
           {fetching ? "Refreshing…" : "↻ Refresh"}
         </button>
@@ -287,9 +320,11 @@ export function MyBookings() {
       {!bookings && fetching && <p className="muted">Loading bookings…</p>}
 
       {bookings && bookings.length === 0 && (
-        <div className="card">
-          <p className="muted">No bookings yet. Book a desk or parking space to get started.</p>
-          <Link className="btn btn--primary btn--sm" href="/" style={{ alignSelf: "flex-start" }}>
+        <div className="card empty-state">
+          <span className="empty-state__icon" aria-hidden="true">⌁</span>
+          <h2>No bookings yet</h2>
+          <p>Book a desk or parking space for your next office day.</p>
+          <Link className="btn btn--primary btn--sm" href="/">
             Book a space
           </Link>
         </div>
@@ -300,10 +335,13 @@ export function MyBookings() {
           {groupByRequest(bookings).map((group) => (
             <li key={group.requestId} className="card booking-group">
               <div className="booking-group__head">
-                <span className="booking-group__date">{formatDate(group.workDate)}</span>
+                <div>
+                  <span className="booking-group__eyebrow">Workday</span>
+                  <span className="booking-group__date">{formatDate(group.workDate)}</span>
+                </div>
                 <span className="booking-group__period">{PERIOD_LABEL[group.period]}</span>
                 {group.items.length > 1 && (
-                  <span className="booking-group__combo">Desk + parking · cancel each separately</span>
+                  <span className="booking-group__combo">2 spaces · manage each separately</span>
                 )}
               </div>
               <ul className="booking-group__items">
@@ -314,11 +352,14 @@ export function MyBookings() {
                   const deadline = new Date(item.checkinDeadlineAt).getTime();
                   const withinWindow = now >= opens && now < deadline;
                   return (
-                    <li key={key} className="booking-item">
+                    <li key={key} className={`booking-item booking-item--${item.status}`}>
                       <div className="booking-row">
                         <div className="booking-row__meta">
-                          <span className="booking-row__resource">
-                            {item.resourceType === "desk" ? "🖥" : "🅿"} {item.resourceLabel}
+                          <span className="booking-row__identity">
+                            <span className={`booking-row__icon booking-row__icon--${item.resourceType}`} aria-hidden="true">
+                              {item.resourceType === "desk" ? "D" : "P"}
+                            </span>
+                            <span className="booking-row__resource">{item.resourceLabel}</span>
                           </span>
                           {item.status === "reserved" && <Countdown item={item} now={now} />}
                           {item.status === "checked_in" && (
@@ -334,7 +375,7 @@ export function MyBookings() {
                           {item.status === "reserved" && now < deadline && (
                             <button
                               type="button"
-                              className="btn btn--primary btn--sm"
+                              className={`btn ${withinWindow ? "btn--primary" : "btn--secondary"} btn--sm`}
                               disabled={!withinWindow || busyKeys.has(key)}
                               onClick={() => checkIn(item)}
                             >

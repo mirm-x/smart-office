@@ -30,7 +30,13 @@ export function IdentityBar() {
   return (
     <header className="identity-bar">
       <div className="identity-bar__inner">
-        <span className="identity-bar__brand">Smart Office</span>
+        <span className="identity-bar__brand">
+          <span className="identity-bar__mark" aria-hidden="true">S</span>
+          <span className="identity-bar__brand-copy">
+            <strong>Smart Office</strong>
+            <small>Space booking</small>
+          </span>
+        </span>
         <div className="identity-bar__id">
           <span className="tag-simulated" title="This POC does not use real corporate sign-in.">
             ◈ Simulated sign-in — no real SSO
