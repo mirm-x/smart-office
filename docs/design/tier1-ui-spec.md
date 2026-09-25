@@ -422,9 +422,9 @@ Generic network/500 → `Something went wrong. Please try again.`
 ## 4.4 Simulated-element labelling (ground rule)
 
 - IdentityBar carries the persistent `Simulated sign-in — no real SSO` tag.
-- Any demo-shortened deadline (via `DEMO_RELEASE_DEADLINE_MINUTES`) shown on My
-  bookings must read e.g. `Demo deadline (shortened)` in warning tone — never
-  presented as the production policy time.
+- A deadline shortened with `npm run demo:scenario` is a local synthetic
+  fixture. My bookings shows the shortened time without a special badge, so
+  the presenter must say that the normal policy time is unchanged.
 
 ---
 
