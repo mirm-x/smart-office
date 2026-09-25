@@ -11,6 +11,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "worker": "tsx worker/release-worker.ts",
+    "demo:scenario": "tsx scripts/demo-scenario.ts",
     "db:migrate": "tsx db/migrate.ts"
   },
   "dependencies": {

@@ -55,7 +55,7 @@ curl -s localhost:3000/api/bookings -X POST -H 'content-type: application/json' 
   "resourceTypes": ["desk", "parking"]
 }'
 
-# Check in the desk half of that booking (use the requestId from the response above).
+# Check in the desk resource (both halves of a full-day desk booking).
 # The employee is taken from the session cookie, not the request body.
 curl -s localhost:3000/api/bookings/<requestId>/checkin -X POST -H 'content-type: application/json' \
   -b /tmp/so-cookies.txt -d '{"resourceType": "desk"}'
@@ -67,6 +67,26 @@ test data with a near-term deadline instead of waiting for the 10:00/14:00
 policy cutoffs. A released space can be booked in a later open period; booking
 and checking in during the same period after its deadline is pending the
 facilitator decision.
+
+To demonstrate the release without waiting until 10:00 or 14:00, use the
+**local synthetic demo helper**:
+
+```bash
+npm run worker                         # separate terminal; polls every 15 seconds
+npm run demo:scenario -- prepare       # creates Alice's desk + parking booking
+# Or book both in the UI as emp-alice, then run:
+npm run demo:scenario -- arm-latest
+npm run demo:scenario -- status <request-id>
+```
+
+The helper opens a simulated three-minute check-in window for one future
+booking. Sign in as `emp-alice`, check in the desk, and leave parking unchecked.
+After the deadline, refresh **My bookings**: the desk stays **Checked in** and
+parking becomes **Released**. Sign in as `emp-bob` to book the freed parking
+space for the same future date and period. Explain that this is an accelerated
+synthetic demo window. The helper only accepts a loopback PostgreSQL database
+outside production, and the normal policy deadlines are unchanged.
+Run `npm run demo:scenario -- help` for all commands.
 
 To try cancellation instead, find a reserved desk or parking row in **My
 bookings**, then select **Cancel booking** and confirm. The other resource in a combined
