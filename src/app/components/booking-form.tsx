@@ -174,7 +174,8 @@ function SpaceTile({
 }
 
 export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
-  const { identity } = useIdentity();
+  const { identity, loading } = useIdentity();
+  const employeeId = identity?.employeeExternalId;
 
   const today = useMemo(() => officeNow().date, []);
   const maxDate = useMemo(() => addDays(today, MAX_HORIZON_DAYS), [today]);
@@ -199,7 +200,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
 
   const refreshAvailability = useCallback(async () => {
     availabilityRequest.current?.abort();
-    if (isWeekend) {
+    if (!employeeId || isWeekend) {
       setAvailability(null);
       setAvailabilityIssue(null);
       return;
@@ -231,7 +232,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
       setAvailability(null);
       setAvailabilityIssue({ workDate, period, kind: "unavailable" });
     }
-  }, [workDate, period, isWeekend, identity?.employeeExternalId]);
+  }, [workDate, period, isWeekend, employeeId]);
 
   useEffect(() => {
     void refreshAvailability();
@@ -322,7 +323,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
 
   const periodOptions: Period[] = halfDayEnabled ? ["morning", "afternoon", "full_day"] : ["full_day"];
   const meta = PERIOD_META[period];
-  const visibleAvailability = availability?.workDate === workDate && availability.period === period ? availability : null;
+  const visibleAvailability = employeeId && availability?.workDate === workDate && availability.period === period ? availability : null;
   const visibleIssue = availabilityIssue?.workDate === workDate && availabilityIssue.period === period ? availabilityIssue.kind : null;
 
   const desks = visibleAvailability?.resources.filter((r) => r.type === "desk") ?? [];
@@ -342,7 +343,8 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
   const autoAssigned = [needsDesk ? "desk" : null, needsParking ? "parking" : null].filter(Boolean);
   const bookHelp = picks.length > 0
     ? `${picks.join(" + ")} selected${autoAssigned.length ? `; ${autoAssigned.join(" and ")} assigned automatically` : ""}.`
-    : "Pick specific spaces on the map, or let us assign what you need.";
+    : "Available spaces are assigned automatically unless you choose exact ones.";
+  const resourceLabel = resource === "both" ? "Desk + parking" : resource === "desk" ? "Desk" : "Parking";
 
   return (
     <>
@@ -352,56 +354,16 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
         <p>Find a desk, parking space, or both for your next office day.</p>
       </div>
 
-      {!identity && (
+      {!identity && !loading && (
         <div className="banner banner--info" role="status">
           ⓘ Enter an employee id above to book (e.g. emp-alice).
         </div>
       )}
 
-      <section className="avail" aria-live="polite" aria-label="Availability">
-        <div className="avail__header">
-          <div>
-            <span className="eyebrow avail__eyebrow">Booking availability</span>
-            <h2 className="avail__title">Make room for your day.</h2>
-          </div>
-          <button type="button" className="btn btn--light btn--sm" onClick={() => void refreshAvailability()}>
-            ↻ Refresh
-          </button>
-        </div>
-        {visibleAvailability ? (
-          <>
-            <div className="avail__stats">
-              <div className={`avail-stat ${visibleAvailability.desk > 0 ? "avail-stat--free" : "avail-stat--none"}`}>
-                <span className="avail-stat__num">{visibleAvailability.desk}</span>
-                <span className="avail-stat__label">desk{visibleAvailability.desk === 1 ? "" : "s"} free</span>
-              </div>
-              <div className={`avail-stat ${visibleAvailability.parking > 0 ? "avail-stat--free" : "avail-stat--none"}`}>
-                <span className="avail-stat__num">{visibleAvailability.parking}</span>
-                <span className="avail-stat__label">parking free</span>
-              </div>
-            </div>
-            <p className="avail__caption">
-              {formatDate(workDate)} · {meta.label}, {meta.hours}
-            </p>
-            <p className="avail__note">Availability refreshes every minute while this tab is active.</p>
-          </>
-        ) : (
-          <p className="avail__message">
-            {isWeekend
-              ? "Weekends are closed — pick a weekday."
-              : visibleIssue === "closed"
-                ? `The ${meta.label.toLowerCase()} check-in window has closed today. Choose ${halfDayEnabled ? "a later period or another date" : "another date"}.`
-                : visibleIssue === "unavailable"
-                  ? "Availability could not be loaded. You can still try to book."
-                  : "Checking availability for this period…"}
-          </p>
-        )}
-      </section>
-
-      <form className="card" onSubmit={handleSubmit} aria-describedby="book-help">
+      <form className="card booking-form" onSubmit={handleSubmit} aria-describedby="book-help">
         <div className="card__intro">
-          <h2 className="card__title">Make a reservation</h2>
-          <p>Choose a time, then pick what you need or let us assign it.</p>
+          <h2 className="card__title">Plan your office day</h2>
+          <p>Choose when you need a space. We will show what is free as you go.</p>
         </div>
 
         <div className="form-section">
@@ -413,60 +375,95 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
             </div>
           </div>
 
-          <div className={`field${dateError ? " field--error" : ""}`}>
-            <label className="field__label" htmlFor="work-date">
-              Work date
-            </label>
-            <input
-              id="work-date"
-              className="field__control"
-              type="date"
-              value={workDate}
-              min={today}
-              max={maxDate}
-              required
-              onChange={(e) => {
-                setWorkDate(e.target.value);
-                setAvailability(null);
-                setAvailabilityIssue(null);
-                setSelected({ desk: null, parking: null });
-              }}
-              aria-invalid={dateError ? true : undefined}
-              aria-describedby="date-help"
-            />
-            <span className="field__help" id="date-help">
-              {dateError ?? "Weekdays only, up to 14 days ahead · times shown in Europe/Belgrade."}
-            </span>
+          <div className={`when-fields${halfDayEnabled ? " when-fields--multi" : ""}`}>
+            <div className={`field${dateError ? " field--error" : ""}`}>
+              <label className="field__label" htmlFor="work-date">
+                Work date
+              </label>
+              <input
+                id="work-date"
+                className="field__control"
+                type="date"
+                value={workDate}
+                min={today}
+                max={maxDate}
+                required
+                onChange={(e) => {
+                  setWorkDate(e.target.value);
+                  setAvailability(null);
+                  setAvailabilityIssue(null);
+                  setSelected({ desk: null, parking: null });
+                }}
+                aria-invalid={dateError ? true : undefined}
+                aria-describedby="date-help"
+              />
+              <span className="field__help" id="date-help">
+                {dateError ?? "Weekdays only, up to 14 days ahead · times shown in Europe/Belgrade."}
+              </span>
+            </div>
+
+            <fieldset className="field choice-field">
+              <legend className="field__label">Period</legend>
+              <div className={`period-grid${halfDayEnabled ? "" : " period-grid--single"}`} role="radiogroup" aria-label="Booking period">
+                {periodOptions.map((p) => {
+                  const m = PERIOD_META[p];
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      role="radio"
+                      aria-checked={period === p}
+                      className="period-option"
+                      onClick={() => {
+                        setPeriod(p);
+                        setAvailability(null);
+                        setAvailabilityIssue(null);
+                        setSelected({ desk: null, parking: null });
+                      }}
+                    >
+                      <span className="period-option__label">{m.label}</span>
+                      <span className="period-option__hours">{m.hours}</span>
+                      <span className="period-option__checkin">{m.checkin}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {!halfDayEnabled && <span className="field__help">Full-day bookings only.</span>}
+            </fieldset>
           </div>
 
-          <fieldset className="field choice-field">
-            <legend className="field__label">Period</legend>
-            <div className="period-grid" role="radiogroup" aria-label="Booking period">
-              {periodOptions.map((p) => {
-                const m = PERIOD_META[p];
-                return (
-                  <button
-                    key={p}
-                    type="button"
-                    role="radio"
-                    aria-checked={period === p}
-                    className="period-option"
-                    onClick={() => {
-                      setPeriod(p);
-                      setAvailability(null);
-                      setAvailabilityIssue(null);
-                      setSelected({ desk: null, parking: null });
-                    }}
-                  >
-                    <span className="period-option__label">{m.label}</span>
-                    <span className="period-option__hours">{m.hours}</span>
-                    <span className="period-option__checkin">{m.checkin}</span>
-                  </button>
-                );
-              })}
-            </div>
-            {!halfDayEnabled && <span className="field__help">Half-day booking is not enabled — full day only.</span>}
-          </fieldset>
+          {identity && (
+            <section className="availability-strip" aria-live="polite" aria-label="Booking availability">
+              <div className="availability-strip__header">
+                <div>
+                  <span className="eyebrow">Available for this booking</span>
+                  <p>{formatDate(workDate)} · {meta.label}</p>
+                </div>
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => void refreshAvailability()}>
+                  ↻ Refresh
+                </button>
+              </div>
+              {visibleAvailability ? (
+                <>
+                  <div className="availability-strip__counts">
+                    <span><strong>{visibleAvailability.desk}</strong> desks free</span>
+                    <span><strong>{visibleAvailability.parking}</strong> parking free</span>
+                  </div>
+                  <p className="availability-strip__note">Booking availability · updated automatically</p>
+                </>
+              ) : (
+                <p className="availability-strip__message">
+                  {isWeekend
+                    ? "Weekends are closed — pick a weekday."
+                    : visibleIssue === "closed"
+                      ? `The ${meta.label.toLowerCase()} check-in window has closed today. Choose ${halfDayEnabled ? "a later period or another date" : "another date"}.`
+                      : visibleIssue === "unavailable"
+                        ? "Availability could not be loaded. You can still try to book."
+                        : "Checking availability for this period…"}
+                </p>
+              )}
+            </section>
+          )}
         </div>
 
         <div className="form-section">
@@ -496,79 +493,84 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
             </div>
           </fieldset>
 
-          {/* Illustrative layout; selectable desks and parking show booking availability. */}
           {visibleAvailability && visibleAvailability.resources.length > 0 && (
-          <div className="field" role="group" aria-label="Floor map">
-            <div className="row-between">
-              <span className="field__label">Pick a specific space <span className="optional">(optional)</span></span>
-              <span className="tag-simulated">Illustrative layout · booking availability</span>
-            </div>
-            <div className="floorplan">
-              <div className="floorplan__room">
-                {(resource === "desk" || resource === "both") && (
-                  <div className="room-area">
-                    <div className="room-area__head">
-                      <span className="room-area__title">Desks</span>
-                      <span className="room-area__count">
-                        {deskFree}/{desks.length} free
-                      </span>
-                    </div>
-                    <div className="pods">
-                      {pods.map(([pod, items]) => (
-                        <div className="pod" key={pod}>
-                          <span className="pod__label">Pod {pod}</span>
-                          <div className="pod__grid">
-                            {items.map((r) => (
-                              <SpaceTile
-                                key={r.id}
-                                r={r}
-                                selected={selected.desk === r.id}
-                                onSelect={(id) => selectSpace("desk", id)}
-                              />
-                            ))}
-                          </div>
+            <details className="space-picker">
+              <summary className="space-picker__summary">
+                <span>
+                  <strong>Choose an exact space</strong>
+                  <small>Optional · we can assign a free one for you</small>
+                </span>
+                <span className="space-picker__selection">{picks.length ? picks.join(" + ") : "Automatic assignment"}</span>
+              </summary>
+              <div className="space-picker__content">
+                <span className="tag-simulated">Illustrative layout · booking availability</span>
+                <div className="floorplan">
+                  <div className="floorplan__room">
+                    {(resource === "desk" || resource === "both") && (
+                      <div className="room-area">
+                        <div className="room-area__head">
+                          <span className="room-area__title">Desks</span>
+                          <span className="room-area__count">
+                            {deskFree}/{desks.length} free
+                          </span>
                         </div>
-                      ))}
-                    </div>
+                        <div className="pods">
+                          {pods.map(([pod, items]) => (
+                            <div className="pod" key={pod}>
+                              <span className="pod__label">Pod {pod}</span>
+                              <div className="pod__grid">
+                                {items.map((r) => (
+                                  <SpaceTile
+                                    key={r.id}
+                                    r={r}
+                                    selected={selected.desk === r.id}
+                                    onSelect={(id) => selectSpace("desk", id)}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {(resource === "parking" || resource === "both") && (
+                      <div className="room-area">
+                        <div className="room-area__head">
+                          <span className="room-area__title">Parking</span>
+                          <span className="room-area__count">
+                            {parkingFree}/{parking.length} free
+                          </span>
+                        </div>
+                        <div className="parking-row">
+                          {parking.map((r) => (
+                            <SpaceTile
+                              key={r.id}
+                              r={r}
+                              selected={selected.parking === r.id}
+                              onSelect={(id) => selectSpace("parking", id)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-                {(resource === "parking" || resource === "both") && (
-                  <div className="room-area">
-                    <div className="room-area__head">
-                      <span className="room-area__title">Parking</span>
-                      <span className="room-area__count">
-                        {parkingFree}/{parking.length} free
-                      </span>
-                    </div>
-                    <div className="parking-row">
-                      {parking.map((r) => (
-                        <SpaceTile
-                          key={r.id}
-                          r={r}
-                          selected={selected.parking === r.id}
-                          onSelect={(id) => selectSpace("parking", id)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
+                </div>
+                <div className="plan-legend" aria-hidden="true">
+                  <span className="plan-legend__item">
+                    <span className="plan-legend__swatch plan-legend__swatch--free" /> Free
+                  </span>
+                  <span className="plan-legend__item">
+                    <span className="plan-legend__swatch plan-legend__swatch--selected" /> Selected
+                  </span>
+                  <span className="plan-legend__item">
+                    <span className="plan-legend__swatch plan-legend__swatch--mine" /> Yours
+                  </span>
+                  <span className="plan-legend__item">
+                    <span className="plan-legend__swatch plan-legend__swatch--taken" /> Taken
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="plan-legend" aria-hidden="true">
-              <span className="plan-legend__item">
-                <span className="plan-legend__swatch plan-legend__swatch--free" /> Free
-              </span>
-              <span className="plan-legend__item">
-                <span className="plan-legend__swatch plan-legend__swatch--selected" /> Selected
-              </span>
-              <span className="plan-legend__item">
-                <span className="plan-legend__swatch plan-legend__swatch--mine" /> Yours
-              </span>
-              <span className="plan-legend__item">
-                <span className="plan-legend__swatch plan-legend__swatch--taken" /> Taken
-              </span>
-            </div>
-          </div>
+            </details>
           )}
         </div>
 
@@ -579,11 +581,14 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
         )}
 
         <div className="booking-submit">
-          <span className="muted" id="book-help">
-            {bookHelp}
-          </span>
+          <div className="booking-review">
+            <span className="eyebrow">Your reservation</span>
+            <strong>{formatDate(workDate)} · {meta.label}</strong>
+            <span>{resourceLabel} · {meta.hours}</span>
+            <span className="muted" id="book-help">{bookHelp}</span>
+          </div>
           <button type="submit" className="btn btn--primary" disabled={!identity || submitting || visibleIssue === "closed"}>
-            {submitting ? "Booking…" : "Confirm booking →"}
+            {submitting ? "Booking…" : "Reserve space →"}
           </button>
         </div>
       </form>

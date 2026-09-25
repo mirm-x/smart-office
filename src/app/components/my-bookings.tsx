@@ -7,6 +7,9 @@ import { useIdentity } from "./identity";
 type ClaimStatus = "reserved" | "checked_in" | "released" | "cancelled";
 type Period = "morning" | "afternoon" | "full_day";
 const BOOKINGS_REFRESH_MS = 60_000;
+const OFFICE_CLOCK = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/Belgrade", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23",
+});
 
 interface BookingItem {
   requestId: string;
@@ -75,9 +78,8 @@ interface BookingGroup {
 }
 
 // Groups an employee's booking rows by request, so a desk + parking booked
-// together show as one card. Order is preserved (server sorts by date desc);
-// resources within a group are ordered desk then parking. Each resource keeps
-// its own status and cancel/check-in controls -- grouping is display only.
+// together show as one card. Resources within a group are ordered desk then
+// parking. Each resource keeps its own controls -- grouping is display only.
 function groupByRequest(items: BookingItem[]): BookingGroup[] {
   const order: string[] = [];
   const groups = new Map<string, BookingGroup>();
@@ -94,6 +96,19 @@ function groupByRequest(items: BookingItem[]): BookingGroup[] {
     group.items.sort((a, b) => (a.resourceType === b.resourceType ? 0 : a.resourceType === "desk" ? -1 : 1));
   }
   return order.map((id) => groups.get(id)!);
+}
+
+function officeNow(now: number): { date: string; hour: number } {
+  const parts = OFFICE_CLOCK.formatToParts(new Date(now));
+  const value = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
+  return { date: `${value("year")}-${value("month")}-${value("day")}`, hour: Number(value("hour")) };
+}
+
+const PERIOD_ORDER: Record<Period, number> = { morning: 0, full_day: 0, afternoon: 1 };
+const PERIOD_END_HOUR: Record<Period, number> = { morning: 13, afternoon: 17, full_day: 17 };
+
+function compareGroups(a: BookingGroup, b: BookingGroup): number {
+  return a.workDate.localeCompare(b.workDate) || PERIOD_ORDER[a.period] - PERIOD_ORDER[b.period];
 }
 
 function Countdown({ item, now }: { item: BookingItem; now: number }) {
@@ -281,6 +296,22 @@ export function MyBookings() {
     }
   }
 
+  const groups = bookings ? groupByRequest(bookings) : [];
+  const { date: today, hour } = officeNow(now);
+  const upcoming = groups
+    .filter((group) =>
+      (group.workDate > today || (group.workDate === today && hour < PERIOD_END_HOUR[group.period])) &&
+      group.items.some((item) => item.status === "reserved" || item.status === "checked_in")
+    )
+    .sort(compareGroups);
+  const inactive = groups
+    .filter((group) => !upcoming.includes(group))
+    .sort((a, b) => compareGroups(b, a));
+  const sections = [
+    { key: "upcoming", title: "Coming up", groups: upcoming },
+    ...(inactive.length ? [{ key: "inactive", title: "Booking history", groups: inactive }] : []),
+  ];
+
   if (loading) return <p className="muted">Loading…</p>;
 
   if (!identity) {
@@ -331,103 +362,119 @@ export function MyBookings() {
       )}
 
       {bookings && bookings.length > 0 && (
-        <ul className="booking-list">
-          {groupByRequest(bookings).map((group) => (
-            <li key={group.requestId} className="card booking-group">
-              <div className="booking-group__head">
-                <div>
-                  <span className="booking-group__eyebrow">Workday</span>
-                  <span className="booking-group__date">{formatDate(group.workDate)}</span>
-                </div>
-                <span className="booking-group__period">{PERIOD_LABEL[group.period]}</span>
-                {group.items.length > 1 && (
-                  <span className="booking-group__combo">2 spaces · manage each separately</span>
-                )}
+        <div className="booking-sections">
+          {sections.map((section) => (
+            <section className="booking-section" key={section.key} aria-label={section.title}>
+              <div className="booking-section__head">
+                <h2>{section.title}</h2>
+                <span>{section.groups.length} {section.groups.length === 1 ? "booking" : "bookings"}</span>
               </div>
-              <ul className="booking-group__items">
-                {group.items.map((item) => {
-                  const key = `${item.requestId}:${item.resourceType}`;
-                  const badge = STATUS_BADGE[item.status];
-                  const opens = new Date(item.checkinWindowOpensAt).getTime();
-                  const deadline = new Date(item.checkinDeadlineAt).getTime();
-                  const withinWindow = now >= opens && now < deadline;
-                  return (
-                    <li key={key} className={`booking-item booking-item--${item.status}`}>
-                      <div className="booking-row">
-                        <div className="booking-row__meta">
-                          <span className="booking-row__identity">
-                            <span className={`booking-row__icon booking-row__icon--${item.resourceType}`} aria-hidden="true">
-                              {item.resourceType === "desk" ? "D" : "P"}
-                            </span>
-                            <span className="booking-row__resource">{item.resourceLabel}</span>
-                          </span>
-                          {item.status === "reserved" && <Countdown item={item} now={now} />}
-                          {item.status === "checked_in" && (
-                            <span style={{ color: "var(--status-checkedin-text)", fontSize: 13 }}>
-                              Protected for this period.
-                            </span>
-                          )}
-                        </div>
-                        <div className="booking-row__actions">
-                          <span className={`badge ${badge.className}`}>
-                            {badge.icon} {badge.label}
-                          </span>
-                          {item.status === "reserved" && now < deadline && (
-                            <button
-                              type="button"
-                              className={`btn ${withinWindow ? "btn--primary" : "btn--secondary"} btn--sm`}
-                              disabled={!withinWindow || busyKeys.has(key)}
-                              onClick={() => checkIn(item)}
-                            >
-                              {busyKeys.has(key) ? "Working…" : "Check in"}
-                            </button>
-                          )}
-                          {item.status === "reserved" && (
-                            <button
-                              type="button"
-                              className="btn btn--ghost btn--sm"
-                              disabled={busyKeys.has(key)}
-                              onClick={() => setConfirmingKey(confirmingKey === key ? null : key)}
-                            >
-                              Cancel {item.resourceType}
-                            </button>
-                          )}
-                          {item.status === "released" && (
-                            <Link className="btn btn--ghost btn--sm" href="/">
-                              Find another slot
-                            </Link>
-                          )}
-                        </div>
+              {section.groups.length === 0 && (
+                <div className="card booking-section__empty">
+                  <p>Nothing coming up. Find a space for your next office day.</p>
+                  <Link className="btn btn--secondary btn--sm" href="/">Book a space</Link>
+                </div>
+              )}
+              {section.groups.length > 0 && <ul className="booking-list">
+                {section.groups.map((group, groupIndex) => (
+                  <li key={group.requestId} className={`card booking-group${section.key === "upcoming" && groupIndex === 0 ? " booking-group--next" : ""}`}>
+                    <div className="booking-group__head">
+                      <div>
+                        <span className="booking-group__eyebrow">{section.key === "upcoming" && groupIndex === 0 ? "Next booking" : "Workday"}</span>
+                        <span className="booking-group__date">{formatDate(group.workDate)}</span>
                       </div>
-                      {item.status === "reserved" && confirmingKey === key && (
-                        <div className="booking-cancel" role="group" aria-label={`Cancel ${item.resourceLabel}`}>
-                          <p>Cancel {item.resourceLabel} on {formatDate(item.workDate)} ({PERIOD_LABEL[item.period]})? Your reservation will be removed.</p>
-                          <div className="booking-cancel__actions">
-                            <button type="button" className="btn btn--secondary btn--sm" onClick={() => setConfirmingKey(null)} disabled={busyKeys.has(key)}>
-                              Keep booking
-                            </button>
-                            <button type="button" className="btn btn--danger btn--sm" onClick={() => cancel(item)} disabled={busyKeys.has(key)}>
-                              {busyKeys.has(key) ? "Cancelling…" : "Confirm cancellation"}
-                            </button>
-                          </div>
-                        </div>
+                      <span className="booking-group__period">{PERIOD_LABEL[group.period]}</span>
+                      {group.items.length > 1 && (
+                        <span className="booking-group__combo">2 spaces · manage each separately</span>
                       )}
-                      {item.status === "released" && (
-                        <div className="banner banner--info">Released — check availability for the next bookable period.</div>
-                      )}
-                      {item.status === "cancelled" && <span className="muted">This booking no longer holds the space.</span>}
-                      {rowError[key] && (
-                        <div className="banner banner--error" role="alert">
-                          ⚠ {rowError[key]}
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </li>
+                    </div>
+                    <ul className="booking-group__items">
+                      {group.items.map((item) => {
+                        const key = `${item.requestId}:${item.resourceType}`;
+                        const badge = STATUS_BADGE[item.status];
+                        const opens = new Date(item.checkinWindowOpensAt).getTime();
+                        const deadline = new Date(item.checkinDeadlineAt).getTime();
+                        const withinWindow = now >= opens && now < deadline;
+                        return (
+                          <li key={key} className={`booking-item booking-item--${item.status}`}>
+                            <div className="booking-row">
+                              <div className="booking-row__meta">
+                                <span className="booking-row__identity">
+                                  <span className={`booking-row__icon booking-row__icon--${item.resourceType}`} aria-hidden="true">
+                                    {item.resourceType === "desk" ? "D" : "P"}
+                                  </span>
+                                  <span className="booking-row__resource">{item.resourceLabel}</span>
+                                </span>
+                                {item.status === "reserved" && <Countdown item={item} now={now} />}
+                                {item.status === "checked_in" && (
+                                  <span style={{ color: "var(--status-checkedin-text)", fontSize: 13 }}>
+                                    Protected for this period.
+                                  </span>
+                                )}
+                              </div>
+                              <div className="booking-row__actions">
+                                <span className={`badge ${badge.className}`}>
+                                  {badge.icon} {badge.label}
+                                </span>
+                                {item.status === "reserved" && now < deadline && (
+                                  <button
+                                    type="button"
+                                    className={`btn ${withinWindow ? "btn--primary" : "btn--secondary"} btn--sm`}
+                                    disabled={!withinWindow || busyKeys.has(key)}
+                                    onClick={() => checkIn(item)}
+                                  >
+                                    {busyKeys.has(key) ? "Working…" : "Check in"}
+                                  </button>
+                                )}
+                                {item.status === "reserved" && (
+                                  <button
+                                    type="button"
+                                    className="btn btn--ghost btn--sm"
+                                    disabled={busyKeys.has(key)}
+                                    onClick={() => setConfirmingKey(confirmingKey === key ? null : key)}
+                                  >
+                                    Cancel {item.resourceType}
+                                  </button>
+                                )}
+                                {item.status === "released" && (
+                                  <Link className="btn btn--ghost btn--sm" href="/">
+                                    Find another slot
+                                  </Link>
+                                )}
+                              </div>
+                            </div>
+                            {item.status === "reserved" && confirmingKey === key && (
+                              <div className="booking-cancel" role="group" aria-label={`Cancel ${item.resourceLabel}`}>
+                                <p>Cancel {item.resourceLabel} on {formatDate(item.workDate)} ({PERIOD_LABEL[item.period]})? Your reservation will be removed.</p>
+                                <div className="booking-cancel__actions">
+                                  <button type="button" className="btn btn--secondary btn--sm" onClick={() => setConfirmingKey(null)} disabled={busyKeys.has(key)}>
+                                    Keep booking
+                                  </button>
+                                  <button type="button" className="btn btn--danger btn--sm" onClick={() => cancel(item)} disabled={busyKeys.has(key)}>
+                                    {busyKeys.has(key) ? "Cancelling…" : "Confirm cancellation"}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            {item.status === "released" && (
+                              <div className="banner banner--info">Released — check availability for the next bookable period.</div>
+                            )}
+                            {item.status === "cancelled" && <span className="muted">This booking no longer holds the space.</span>}
+                            {rowError[key] && (
+                              <div className="banner banner--error" role="alert">
+                                ⚠ {rowError[key]}
+                              </div>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                ))}
+              </ul>}
+            </section>
           ))}
-        </ul>
+        </div>
       )}
     </>
   );

@@ -17,16 +17,23 @@ Screens into frames.
 
 ## Implemented visual refinement (September 2026)
 
-The running POC keeps this specification's light palette, system font, 760px
-content column, explicit status labels, and simulated-integration labelling.
-The current UI adds a blue **booking availability** panel, a two-step booking
-form, a selectable illustrative floor map (see
+The running POC keeps this specification's light palette, system font,
+explicit status labels, and simulated-integration labelling. The implemented
+screens use an 860px content column and a two-step booking form. Booking
+availability sits beside the date and period choice after sign-in, so it
+describes the current request without delaying the form or showing resource
+counts to an unsigned visitor. The selectable illustrative floor
+map is available from an optional expander (see
 [`0002-specific-resource-selection.md`](../decisions/0002-specific-resource-selection.md)),
-and request-grouped booking cards. The map shows booking availability; it does
-not claim to show live sensor occupancy.
+while automatic assignment remains the default. My bookings puts the nearest
+active request first and keeps older or inactive requests in Booking history.
+Desk pods use equal-size cards and wrap to another row when more pods are
+present; the map does not depend on a carousel.
+The map shows booking availability; it does not claim to show live sensor
+occupancy.
 
 For the implemented screens, `src/app/globals.css` is the reference for the
-refined spacing, shadows, 18px card corners, period-card layout, and mobile
+refined spacing, quiet borders, 16px card corners, period-card layout, and mobile
 breakpoints. The SVG mockups and JSON tokens below remain the original design
 handoff and have not been regenerated to depict this refinement.
 
