@@ -5,7 +5,7 @@ import { createBooking } from "../src/server/booking-service";
 import { OFFICE_TIME_ZONE, Period, claimsForPeriod, isWorkingDate } from "../src/server/booking-policy";
 
 const DEMO_EMPLOYEE = "emp-alice";
-const DEMO_WINDOW_SECONDS = 180;
+const DEMO_WINDOW_SECONDS = 60;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface DemoClaim {
@@ -215,7 +215,7 @@ function help() {
   console.log(`Local synthetic demo helper
 
   npm run demo:scenario -- prepare
-    Creates Alice's future desk + parking booking and opens a 3-minute simulated check-in window.
+    Creates Alice's future desk + parking booking and opens a 60-second simulated check-in window.
 
   npm run demo:scenario -- arm <request-id>
     Applies the same simulated window to Alice's existing future desk + parking booking.
