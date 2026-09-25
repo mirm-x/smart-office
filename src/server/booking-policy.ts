@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 // Encodes the booking table from plan section 2 ("Booking policy for the
 // proposal"). This is the proposed amendment to the spec's day-only BR-01 /
 // BR-02 rules and MUST be confirmed with a facilitator acting as the client
-// before it is treated as final -- see docs/decisions/0001-half-day-booking-policy.md.
+// before it is treated as final -- see docs/decisions/README.md#decision-0001-half-day-booking-policy.
 
 export type Period = "morning" | "afternoon" | "full_day";
 export type ClaimPeriod = "morning" | "afternoon";

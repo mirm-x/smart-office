@@ -30,7 +30,7 @@ Our POC is not just a demo—it shows an Agentic SDLC where every decision is tr
 production grade for the pilot site** -- not the full client specification.
 Everything else the spec describes is real and valuable, but it's a future
 phase, not part of this bid or its price below (see the decision record
-`docs/decisions/0003-scope-to-three-value-features.md`).
+`docs/decisions/README.md#decision-0003-scope-the-bid-to-three-value-carrying-features`).
 
 | Capability area | What it covers | In this bid? | POC status |
 |---|---|---|---|
@@ -217,7 +217,7 @@ approval on architecture and the booking-policy decision record, and
 acceptance review at the end of each phase below.
 
 **Delivery phases** (person-days at €800/day, scoped to the three
-value-carrying features -- see `docs/decisions/0003-scope-to-three-value-features.md`).
+value-carrying features -- see `docs/decisions/README.md#decision-0003-scope-the-bid-to-three-value-carrying-features`).
 Person-days are **billed working time only**: headcount actually engaged x
 working days, for build time (Agentic SDLC-assisted implementation, review,
 testing) or on-site presence (workshops, installation, training). Time spent
@@ -313,7 +313,7 @@ otherwise be closer to 12.
 Billed at **€800/day for days actually worked** -- build time or on-site
 presence, never calendar time spent waiting on an external party (see
 Timeline). Scoped to the three value-carrying features only (see Complete
-specification coverage and `docs/decisions/0003-scope-to-three-value-features.md`).
+specification coverage and `docs/decisions/README.md#decision-0003-scope-the-bid-to-three-value-carrying-features`).
 
 | Item | Person-days | Cost at €800/day |
 |---|---:|---:|
@@ -344,7 +344,7 @@ commitment.
 ## Boundaries and open items
 
 - **This bid is scoped to three value-carrying features, not the full
-  specification** -- see `docs/decisions/0003-scope-to-three-value-features.md`.
+  specification** -- see `docs/decisions/README.md#decision-0003-scope-the-bid-to-three-value-carrying-features`.
   The client's full **Smart Office System Specification** (19 functional
   requirements, 9 business rules, 14 quality requirements) is referenced by
   the plan but was not available when this draft was written. A full
@@ -354,7 +354,7 @@ commitment.
   "No -- deferred" in Complete specification coverage stays out of this
   bid's traceability until it's actually scoped.
 - The half-day booking policy is **still pending a written facilitator
-  decision** -- see `docs/decisions/0001-half-day-booking-policy.md`. Both the
+  decision** -- see `docs/decisions/README.md#decision-0001-half-day-booking-policy`. Both the
   capability table and the price table above already carry the fallback if
   it's declined; update the "Value" and "Complete specification coverage"
   sections' wording (morning/afternoon vs. full-day-only) once the decision

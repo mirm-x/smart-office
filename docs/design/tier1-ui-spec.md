@@ -24,7 +24,7 @@ availability sits beside the date and period choice after sign-in, so it
 describes the current request without delaying the form or showing resource
 counts to an unsigned visitor. The selectable illustrative floor
 map is available from an optional expander (see
-[`0002-specific-resource-selection.md`](../decisions/0002-specific-resource-selection.md)),
+[decision 0002](../decisions/README.md#decision-0002-specific-resource-selection-on-the-floor-map-seatspace-picker)),
 while automatic assignment remains the default. My bookings puts the nearest
 active request first and keeps older or inactive requests in Booking history.
 Desk pods use equal-size cards and wrap to another row when more pods are
@@ -57,7 +57,7 @@ simulated sign-in stub, the illustrative resource picker accepted in decision
 **Out of scope (do not design here):** guided-chat conversational assistant,
 sensor/LED occupancy panel, admin console, notifications, and "Book and check
 in now" (gated on the pending facilitator decision — see
-`docs/decisions/0001-half-day-booking-policy.md`).
+`docs/decisions/README.md#decision-0001-half-day-booking-policy`).
 
 **Policy gates that shape the UI:**
 

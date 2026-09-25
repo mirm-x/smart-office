@@ -49,7 +49,7 @@ const UNIQUE_VIOLATION = "23505";
 
 // Reviewed plan section 2/6: half-day booking is a proposed amendment to the
 // spec's day-only BR-01, pending a written facilitator decision (see
-// docs/decisions/0001-half-day-booking-policy.md). The POC demo enables the
+// docs/decisions/README.md#decision-0001-half-day-booking-policy). The POC demo enables the
 // proposed periods without claiming client acceptance. Setting the flag false
 // returns to the original full-day-only flow with no data-model change -- a
 // full-day request already claims both halves.
