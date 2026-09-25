@@ -79,7 +79,7 @@ npm run demo:scenario -- arm-latest
 npm run demo:scenario -- status <request-id>
 ```
 
-The helper opens a simulated three-minute check-in window for one future
+The helper opens a simulated 60-second check-in window for one future
 booking. Sign in as `emp-alice`, check in the desk, and leave parking unchecked.
 After the deadline, refresh **My bookings**: the desk stays **Checked in** and
 parking becomes **Released**. Sign in as `emp-bob` to book the freed parking
