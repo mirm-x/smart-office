@@ -2,6 +2,13 @@
 
 **Status:** Proposed -- pending a **written** facilitator decision (reviewed plan section 2/6, "the first decision"). Get this before the team commits further to the segment-based data model; setup and client-story work continue in the meantime.
 
+**POC demo choice (2026-09-25):** The team asked to enable the existing
+morning/afternoon/full-day flow for the demonstration. The demo flag is on in
+`.env.example`; this is not facilitator acceptance of the BR-01/BR-02 amendment.
+Present these periods as a proposed capability until the written decision is
+recorded below. The original full-day-only flow remains available by setting
+`HALF_DAY_BOOKING_ENABLED=false`.
+
 ## Questions to put to the facilitator (ask together, one written decision)
 
 1. Does half-day booking **replace** the spec's day-only rule, or **extend** it as an additional choice?

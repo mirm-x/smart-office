@@ -49,10 +49,10 @@ const UNIQUE_VIOLATION = "23505";
 
 // Reviewed plan section 2/6: half-day booking is a proposed amendment to the
 // spec's day-only BR-01, pending a written facilitator decision (see
-// docs/decisions/0001-half-day-booking-policy.md). Until that decision is
-// recorded as accepted, keep this false and the API falls back to the
-// original full-day-only flow with no data-model change -- a full-day
-// request already claims both halves, so the fallback needs no rework.
+// docs/decisions/0001-half-day-booking-policy.md). The POC demo enables the
+// proposed periods without claiming client acceptance. Setting the flag false
+// returns to the original full-day-only flow with no data-model change -- a
+// full-day request already claims both halves.
 const HALF_DAY_BOOKING_ENABLED = process.env.HALF_DAY_BOOKING_ENABLED === "true";
 
 /**

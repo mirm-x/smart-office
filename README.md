@@ -13,9 +13,11 @@ for the Agentic SDLC this repo follows.
 ## Status
 
 The booking and My bookings screens, booking/check-in/cancellation service and no-show
-release worker are implemented. Half-day booking is **pending a written
-facilitator decision** (`docs/decisions/0001-half-day-booking-policy.md`) and
-defaults off until accepted. The conversational assistant and sensor/LED
+release worker are implemented. The POC demo enables morning, afternoon and
+full-day booking, but this change to BR-01/BR-02 is **pending a written
+facilitator decision** (`docs/decisions/0001-half-day-booking-policy.md`).
+Set `HALF_DAY_BOOKING_ENABLED=false` to show the original full-day-only rule.
+The conversational assistant and sensor/LED
 simulation remain future work; check new work against `docs/poc-scope.md`.
 
 ## Stack
