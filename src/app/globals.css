@@ -933,6 +933,104 @@ a {
   font-size: 12px;
 }
 
+/* Green availability banner (top of Book page) --------------------------- */
+.availability-banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid #b6e2c4;
+  background: var(--status-checkedin-bg);
+  color: var(--status-checkedin-text);
+  box-shadow: var(--shadow-1);
+}
+
+.availability-banner__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.availability-banner__eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--status-checkedin-text);
+}
+
+.availability-banner__header p {
+  margin: 4px 0 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--status-checkedin-text);
+}
+
+.availability-banner__refresh {
+  color: var(--status-checkedin-text);
+  border-color: #9dd6b1;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.availability-banner__refresh:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.availability-banner__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.availability-banner__counts span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex: 1 1 140px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #c3e8d0;
+  color: var(--status-checkedin-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.availability-banner__counts strong {
+  color: var(--status-checkedin-text);
+  font-size: 30px;
+  font-weight: 850;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.availability-banner__note,
+.availability-banner__message {
+  margin: 0;
+  color: var(--status-checkedin-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Signed-out gate prompt -------------------------------------------------- */
+.signed-out {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  align-items: center;
+}
+
+.signed-out p {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--text-secondary);
+}
+
 /* Period option cards ----------------------------------------------------- */
 .period-grid {
   display: grid;
@@ -1112,16 +1210,21 @@ a {
 }
 
 .pods {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
+  display: flex;
   gap: var(--space-3);
   align-items: stretch;
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
 }
 
 .pod {
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  flex: 0 0 204px;
+  min-width: 204px;
+  scroll-snap-align: start;
   gap: var(--space-1);
   padding: var(--space-2);
   border: 1px dashed #bfccdc;
@@ -1146,9 +1249,17 @@ a {
 }
 
 .parking-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  display: flex;
   gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+
+.parking-row > .ptile {
+  flex: 0 0 84px;
+  scroll-snap-align: start;
 }
 
 .ptile {
@@ -1362,10 +1473,6 @@ a {
 
   .booking-submit .btn {
     width: 100%;
-  }
-
-  .pods {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 176px), 1fr));
   }
 }
 

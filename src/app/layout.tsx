@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { IdentityProvider } from "./components/identity";
 import { IdentityBar } from "./components/identity-bar";
-import { AppNav } from "./components/nav";
+import { AppShell } from "./components/app-shell";
 
 export const metadata: Metadata = {
   title: "Smart Office POC",
@@ -15,8 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <IdentityProvider>
           <IdentityBar />
-          <AppNav />
-          <main className="app-main">{children}</main>
+          <AppShell>{children}</AppShell>
         </IdentityProvider>
       </body>
     </html>

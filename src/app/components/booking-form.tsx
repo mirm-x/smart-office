@@ -174,7 +174,7 @@ function SpaceTile({
 }
 
 export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
-  const { identity, loading } = useIdentity();
+  const { identity } = useIdentity();
   const employeeId = identity?.employeeExternalId;
 
   const today = useMemo(() => officeNow().date, []);
@@ -354,11 +354,36 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
         <p>Find a desk, parking space, or both for your next office day.</p>
       </div>
 
-      {!identity && !loading && (
-        <div className="banner banner--info" role="status">
-          ⓘ Enter an employee id above to book (e.g. emp-alice).
+      <section className="availability-banner" aria-live="polite" aria-label="Booking availability">
+        <div className="availability-banner__header">
+          <div>
+            <span className="availability-banner__eyebrow">Available for this booking</span>
+            <p>{formatDate(workDate)} · {meta.label}</p>
+          </div>
+          <button type="button" className="btn btn--ghost btn--sm availability-banner__refresh" onClick={() => void refreshAvailability()}>
+            ↻ Refresh
+          </button>
         </div>
-      )}
+        {visibleAvailability ? (
+          <>
+            <div className="availability-banner__counts">
+              <span><strong>{visibleAvailability.desk}</strong> desks free</span>
+              <span><strong>{visibleAvailability.parking}</strong> parking free</span>
+            </div>
+            <p className="availability-banner__note">Booking availability · updated automatically</p>
+          </>
+        ) : (
+          <p className="availability-banner__message">
+            {isWeekend
+              ? "Weekends are closed — pick a weekday."
+              : visibleIssue === "closed"
+                ? `The ${meta.label.toLowerCase()} check-in window has closed today. Choose ${halfDayEnabled ? "a later period or another date" : "another date"}.`
+                : visibleIssue === "unavailable"
+                  ? "Availability could not be loaded. You can still try to book."
+                  : "Checking availability for this period…"}
+          </p>
+        )}
+      </section>
 
       <form className="card booking-form" onSubmit={handleSubmit} aria-describedby="book-help">
         <div className="card__intro">
@@ -431,39 +456,6 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
               {!halfDayEnabled && <span className="field__help">Full-day bookings only.</span>}
             </fieldset>
           </div>
-
-          {identity && (
-            <section className="availability-strip" aria-live="polite" aria-label="Booking availability">
-              <div className="availability-strip__header">
-                <div>
-                  <span className="eyebrow">Available for this booking</span>
-                  <p>{formatDate(workDate)} · {meta.label}</p>
-                </div>
-                <button type="button" className="btn btn--ghost btn--sm" onClick={() => void refreshAvailability()}>
-                  ↻ Refresh
-                </button>
-              </div>
-              {visibleAvailability ? (
-                <>
-                  <div className="availability-strip__counts">
-                    <span><strong>{visibleAvailability.desk}</strong> desks free</span>
-                    <span><strong>{visibleAvailability.parking}</strong> parking free</span>
-                  </div>
-                  <p className="availability-strip__note">Booking availability · updated automatically</p>
-                </>
-              ) : (
-                <p className="availability-strip__message">
-                  {isWeekend
-                    ? "Weekends are closed — pick a weekday."
-                    : visibleIssue === "closed"
-                      ? `The ${meta.label.toLowerCase()} check-in window has closed today. Choose ${halfDayEnabled ? "a later period or another date" : "another date"}.`
-                      : visibleIssue === "unavailable"
-                        ? "Availability could not be loaded. You can still try to book."
-                        : "Checking availability for this period…"}
-                </p>
-              )}
-            </section>
-          )}
         </div>
 
         <div className="form-section">
@@ -494,7 +486,7 @@ export function BookingForm({ halfDayEnabled }: { halfDayEnabled: boolean }) {
           </fieldset>
 
           {visibleAvailability && visibleAvailability.resources.length > 0 && (
-            <details className="space-picker">
+            <details className="space-picker" open>
               <summary className="space-picker__summary">
                 <span>
                   <strong>Choose an exact space</strong>

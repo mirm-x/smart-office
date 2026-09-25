@@ -24,7 +24,7 @@ const PERIOD_WINDOWS: Record<Period, PeriodWindow> = {
     claims: ["morning"],
     reservedStart: "09:00",
     reservedEnd: "13:00",
-    checkinWindowOpens: "09:00",
+    checkinWindowOpens: "07:00",
     checkinDeadline: "10:00",
   },
   afternoon: {
@@ -38,7 +38,7 @@ const PERIOD_WINDOWS: Record<Period, PeriodWindow> = {
     claims: ["morning", "afternoon"],
     reservedStart: "09:00",
     reservedEnd: "17:00",
-    checkinWindowOpens: "09:00",
+    checkinWindowOpens: "07:00",
     checkinDeadline: "10:00",
   },
 };
@@ -47,7 +47,7 @@ const PERIOD_WINDOWS: Record<Period, PeriodWindow> = {
 // was created by a full-day request (a full-day check-in protects both, see
 // acceptance criteria, but each claim can still be released independently).
 const CLAIM_WINDOWS: Record<ClaimPeriod, Pick<PeriodWindow, "checkinWindowOpens" | "checkinDeadline">> = {
-  morning: { checkinWindowOpens: "09:00", checkinDeadline: "10:00" },
+  morning: { checkinWindowOpens: "07:00", checkinDeadline: "10:00" },
   afternoon: { checkinWindowOpens: "13:00", checkinDeadline: "14:00" },
 };
 
